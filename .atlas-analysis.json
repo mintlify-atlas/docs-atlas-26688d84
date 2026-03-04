@@ -1,0 +1,104 @@
+{
+  "projectType": "general",
+  "projectName": "Zalbi Theme",
+  "projectDescription": "A custom WordPress theme for Zalbi Aisia eta Abenturs, featuring inflatable rentals and event management capabilities.",
+  "theme": "mint",
+  "primaryColor": "#848c8e",
+  "lightColor": "#11161e",
+  "darkColor": "#cfd0d2",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quick-start"
+            ]
+          },
+          {
+            "group": "Theme Structure",
+            "pages": [
+              "structure/overview",
+              "structure/template-hierarchy",
+              "structure/file-organization"
+            ]
+          },
+          {
+            "group": "Custom Post Types",
+            "pages": [
+              "post-types/hinchables",
+              "post-types/eventos",
+              "post-types/taxonomies"
+            ]
+          },
+          {
+            "group": "Customization",
+            "pages": [
+              "customization/theme-customizer",
+              "customization/whatsapp-button",
+              "customization/menus"
+            ]
+          },
+          {
+            "group": "Template Development",
+            "pages": [
+              "templates/custom-templates",
+              "templates/template-parts",
+              "templates/hooks-filters"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Functions",
+            "pages": [
+              "api/theme-setup",
+              "api/template-tags",
+              "api/customizer-functions"
+            ]
+          },
+          {
+            "group": "Hooks & Filters",
+            "pages": [
+              "api/actions",
+              "api/filters"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Custom post types for Hinchables (inflatables) and Eventos (events)",
+    "Custom taxonomy for filtering inflatable types",
+    "WhatsApp floating button integration via theme customizer",
+    "Responsive navigation with mobile toggle",
+    "Custom page templates for catalogs and events",
+    "Built on Underscores (_s) starter theme",
+    "RTL language support",
+    "Jetpack compatibility"
+  ],
+  "publicApiSurface": [
+    "zalbi_setup()",
+    "zalbi_widgets_init()",
+    "zalbi_scripts()",
+    "zalbi_register_hinchables()",
+    "zalbi_register_eventos()",
+    "zalbi_register_taxonomies()",
+    "zalbi_customize_whatsapp()",
+    "zalbi_posted_on()",
+    "zalbi_posted_by()",
+    "zalbi_entry_footer()",
+    "zalbi_post_thumbnail()",
+    "zalbi_customize_register()",
+    "zalbi_customize_partial_blogname()",
+    "zalbi_customize_partial_blogdescription()"
+  ]
+}
