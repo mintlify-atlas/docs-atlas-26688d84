@@ -1,0 +1,222 @@
+---
+title: "Installation"
+description: "Install and set up Zalbi Theme on your WordPress site"
+---
+
+## Requirements
+
+<Note>
+  Ensure your environment meets these requirements before installing Zalbi Theme.
+</Note>
+
+### WordPress Environment
+
+- **WordPress** 5.4 or higher
+- **PHP** 5.6 or higher
+- **MySQL** 5.6+ or **MariaDB** 10.0+
+
+### Development Dependencies
+
+For theme development and customization:
+
+- **Node.js** (for asset compilation)
+- **Composer** (for PHP dependency management)
+- **npm** or **yarn** (package manager)
+
+### Required Plugins
+
+<Warning>
+  The theme requires these plugins for full functionality:
+</Warning>
+
+- **Advanced Custom Fields (ACF)** - For custom product/event fields
+- **Polylang** - For multilingual support (Spanish/Basque)
+
+## Installation Steps
+
+<Steps>
+  <Step title="Download the Theme">
+    Clone the repository from GitHub or download the theme files:
+    
+    ```bash
+    git clone https://github.com/Garridoparrayeray/zalbi-theme.git
+    ```
+    
+    Alternatively, download the ZIP file from the GitHub repository.
+  </Step>
+  
+  <Step title="Upload to WordPress">
+    There are two ways to upload the theme:
+    
+    **Option A: Via WordPress Admin**
+    
+    1. Navigate to **Appearance > Themes** in your WordPress dashboard
+    2. Click **Add New** → **Upload Theme**
+    3. Choose the theme ZIP file
+    4. Click **Install Now**
+    
+    **Option B: Via FTP/File Manager**
+    
+    1. Upload the `zalbi-theme` folder to `/wp-content/themes/`
+    2. Ensure proper file permissions (typically 755 for folders, 644 for files)
+  </Step>
+  
+  <Step title="Install PHP Dependencies">
+    Navigate to the theme directory and install Composer dependencies:
+    
+    ```bash
+    cd wp-content/themes/zalbi-theme
+    composer install
+    ```
+    
+    This installs development tools like PHP CodeSniffer for code quality checks.
+  </Step>
+  
+  <Step title="Install Node.js Dependencies">
+    Install npm packages for asset compilation:
+    
+    ```bash
+    npm install
+    ```
+    
+    <Info>
+      The theme uses Node.js for compiling SASS to CSS and other build processes.
+    </Info>
+  </Step>
+  
+  <Step title="Compile Assets (Development)">
+    Compile the theme's stylesheets:
+    
+    ```bash
+    npm run compile:css
+    ```
+    
+    For RTL (right-to-left) language support:
+    
+    ```bash
+    npm run compile:rtl
+    ```
+    
+    <Accordion title="Available npm commands">
+      - `npm run compile:css` - Compiles SASS files to CSS
+      - `npm run compile:rtl` - Generates RTL stylesheet
+      - `npm run watch` - Watches SASS files and recompiles on changes
+      - `npm run lint:scss` - Checks SASS files against CSS coding standards
+      - `npm run lint:js` - Checks JavaScript files against coding standards
+      - `npm run bundle` - Creates a distribution ZIP file
+    </Accordion>
+  </Step>
+  
+  <Step title="Activate the Theme">
+    1. Go to **Appearance > Themes** in WordPress admin
+    2. Find **zalbi-theme**
+    3. Click **Activate**
+    
+    <Warning>
+      Before activating, ensure Advanced Custom Fields and Polylang plugins are installed and activated.
+    </Warning>
+  </Step>
+</Steps>
+
+## Install Required Plugins
+
+### Advanced Custom Fields (ACF)
+
+<Steps>
+  <Step title="Install ACF">
+    1. Go to **Plugins > Add New**
+    2. Search for "Advanced Custom Fields"
+    3. Install and activate the plugin
+  </Step>
+  
+  <Step title="Configure Custom Fields">
+    The theme expects the following ACF field groups:
+    
+    **For Hinchables (Inflatables):**
+    - `medidas` (text) - Dimensions
+    - `capacidad` (text) - Capacity
+    - `etiqueta_color` (select) - Category color tag
+    
+    **For Eventos (Events):**
+    - `etiqueta_texto` (text) - Category label
+    - `etiqueta_color` (select) - Category color tag  
+    - `duracion` (text) - Duration
+    - `publico` (text) - Target audience
+    
+    <Info>
+      You'll need to create these field groups manually in ACF or import them if a configuration file is provided.
+    </Info>
+  </Step>
+</Steps>
+
+### Polylang
+
+<Steps>
+  <Step title="Install Polylang">
+    1. Go to **Plugins > Add New**
+    2. Search for "Polylang"
+    3. Install and activate the plugin
+  </Step>
+  
+  <Step title="Configure Languages">
+    1. Navigate to **Languages** in the WordPress admin
+    2. Add **Spanish (Español)** and **Basque (Euskara)**
+    3. Set your default language
+    4. Configure URL modifications (subdirectories recommended)
+  </Step>
+  
+  <Step title="Translate Strings">
+    The theme includes language detection for UI elements. Polylang will automatically:
+    
+    - Create language-specific versions of posts and pages
+    - Manage menu translations
+    - Handle URL structure per language
+  </Step>
+</Steps>
+
+## Verification
+
+After installation, verify everything is working:
+
+<Accordion title="Checklist">
+  - [ ] Theme is activated in **Appearance > Themes**
+  - [ ] Custom post types appear: **Hinchables** and **Eventos**
+  - [ ] ACF fields are available when editing posts
+  - [ ] Polylang language switcher is visible
+  - [ ] No PHP errors in debug log
+  - [ ] Stylesheet loads correctly on frontend
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Custom post types not appearing">
+    1. Go to **Settings > Permalinks**
+    2. Click **Save Changes** (this flushes rewrite rules)
+    3. Refresh your admin panel
+  </Accordion>
+  
+  <Accordion title="ACF fields not showing">
+    - Ensure ACF plugin is activated
+    - Check that field groups are assigned to the correct post types
+    - Verify field group location rules
+  </Accordion>
+  
+  <Accordion title="Styles not loading">
+    - Run `npm run compile:css` to compile SASS
+    - Clear browser cache
+    - Check file permissions on `style.css`
+  </Accordion>
+  
+  <Accordion title="Composer/npm errors">
+    - Ensure you have the correct versions of Node.js and Composer
+    - Delete `node_modules` and `vendor` folders, then reinstall
+    - Check for permission issues in the theme directory
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<Card title="Quick Start Guide" icon="rocket" href="/quick-start">
+  Learn how to configure the theme and create your first hinchable or event
+</Card>

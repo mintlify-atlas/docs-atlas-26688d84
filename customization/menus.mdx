@@ -1,0 +1,374 @@
+---
+title: Menus
+description: Menu registration, locations, and customization in Zalbi Theme
+---
+
+Zalbi Theme registers two custom menu locations for site navigation: a primary header menu and a legal footer menu.
+
+## Registered Menu Locations
+
+The theme defines two menu locations in `functions.php:38-43`:
+
+```php functions.php
+register_nav_menus(
+    array(
+        'menu-1'     => esc_html__( 'Primary', 'zalbi' ),
+        'menu-legal' => esc_html__( 'Menú Legal Footer', 'zalbi' ),
+    )
+);
+```
+
+### Primary Menu (`menu-1`)
+
+**Location:** Header navigation bar  
+**Purpose:** Main site navigation (Home, Services, Catalog, Events, Contact, etc.)
+
+### Legal Footer Menu (`menu-legal`)
+
+**Location:** Footer information section  
+**Purpose:** Legal links (Privacy Policy, Legal Notice, Cookie Policy)
+
+## Assigning Menus
+
+<Steps>
+  <Step title="Create a menu">
+    Go to **Appearance > Menus** in WordPress admin.
+    
+    Click **Create a new menu** and give it a name (e.g., "Main Menu").
+  </Step>
+  
+  <Step title="Add menu items">
+    Select pages, posts, custom links, or categories from the left panel.
+    
+    Click **Add to Menu** to include them.
+  </Step>
+  
+  <Step title="Assign to location">
+    Under **Menu Settings**, check the box for:
+    - **Primary** for header navigation
+    - **Menú Legal Footer** for footer links
+  </Step>
+  
+  <Step title="Save menu">
+    Click **Save Menu** to apply changes.
+  </Step>
+</Steps>
+
+## Primary Menu Implementation
+
+The primary menu is displayed in `header.php:45-56`:
+
+```php header.php
+<nav id="site-navigation" class="main-navigation">
+    <?php
+    wp_nav_menu(
+        array(
+            'theme_location' => 'menu-1',
+            'menu_id'        => 'primary-menu',
+            'container'      => false,
+            'menu_class'     => 'menu',
+        )
+    );
+    ?>
+</nav>
+```
+
+### Menu Parameters
+
+- `theme_location` - Uses the registered `menu-1` location
+- `menu_id` - Adds `id="primary-menu"` to the `<ul>` element
+- `container` - Set to `false` to remove wrapper div
+- `menu_class` - Adds `class="menu"` to the `<ul>` element
+
+### Mobile Menu Toggle
+
+The header includes a hamburger button for mobile navigation (`header.php:41-43`):
+
+```php
+<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+    <i class="fas fa-bars"></i>
+</button>
+```
+
+JavaScript handling is in `js/navigation.js`, enqueued at `functions.php:125`.
+
+## Footer Menu Implementation
+
+The legal footer menu is displayed in `footer.php:87-109`:
+
+```php footer.php
+<?php
+if ( has_nav_menu( 'menu-legal' ) ) {
+    wp_nav_menu( array(
+        'theme_location' => 'menu-legal',
+        'menu_class'     => 'footer-links',
+        'container'      => false,
+        'depth'          => 1,
+    ) );
+} else {
+    // Fallback manual links
+    echo '<ul class="footer-links">';
+    echo '<li><a href="' . home_url($url_prefix . '/aviso-legal') . '">' . $link_aviso . '</a></li>';
+    echo '<li><a href="' . home_url($url_prefix . '/politica-privacidad') . '">' . $link_priv . '</a></li>';
+    echo '<li><a href="' . home_url($url_prefix . '/politica-cookies') . '">' . $link_cookies . '</a></li>';
+    echo '</ul>';
+}
+?>
+```
+
+### Menu Parameters
+
+- `theme_location` - Uses the registered `menu-legal` location
+- `menu_class` - Adds `class="footer-links"` for styling
+- `container` - Set to `false` to remove wrapper div
+- `depth` - Set to `1` to show only top-level items (no submenus)
+
+### Fallback Behavior
+
+If no menu is assigned to `menu-legal`, the theme displays default legal links:
+
+- Legal Notice (`/aviso-legal`)
+- Privacy Policy (`/politica-privacidad`)
+- Cookie Policy (`/politica-cookies`)
+
+<Note>
+The fallback links automatically adjust URLs based on the current language (`$url_prefix`) when using Polylang.
+</Note>
+
+## Multilingual Menu Support
+
+### Polylang Integration
+
+When Polylang is active, you should create separate menus for each language:
+
+<Steps>
+  <Step title="Create Spanish menu">
+    Create menu with Spanish items and assign to **Primary** location.
+  </Step>
+  
+  <Step title="Create Basque menu">
+    Create menu with Basque translations and assign to **Primary** location.
+  </Step>
+  
+  <Step title="Polylang handles switching">
+    Polylang automatically displays the correct menu based on current language.
+  </Step>
+</Steps>
+
+### Footer Menu Translation
+
+The footer menu (`menu-legal`) also supports multiple languages:
+
+```php footer.php
+if ( has_nav_menu( 'menu-legal' ) ) {
+    // Polylang automatically detects which menu to load
+    wp_nav_menu( array(
+        'theme_location' => 'menu-legal',
+        // ...
+    ) );
+}
+```
+
+## Menu Styling
+
+Menu styles are defined in `style.css`. Key classes:
+
+### Primary Menu
+
+```css
+.main-navigation .menu {
+    /* Main menu container */
+}
+
+.main-navigation .menu li {
+    /* Menu items */
+}
+
+.main-navigation .menu a {
+    /* Menu links */
+}
+
+.main-navigation .menu li:hover {
+    /* Hover state */
+}
+```
+
+### Footer Menu
+
+```css
+.footer-links {
+    /* Footer menu container */
+}
+
+.footer-links li {
+    /* Footer menu items */
+}
+
+.footer-links a {
+    /* Footer links */
+}
+```
+
+## Adding Submenus
+
+WordPress menus support hierarchical structures:
+
+<Steps>
+  <Step title="Drag and drop items">
+    In **Appearance > Menus**, drag a menu item slightly to the right under another item.
+  </Step>
+  
+  <Step title="Create hierarchy">
+    The indented item becomes a submenu of the parent.
+  </Step>
+  
+  <Step title="Save menu">
+    Click **Save Menu**.
+  </Step>
+</Steps>
+
+<Warning>
+The footer menu uses `depth => 1`, which prevents submenus from displaying. To show submenus, remove or increase the depth parameter.
+</Warning>
+
+## Custom Menu Classes
+
+Add custom CSS classes to individual menu items:
+
+<Steps>
+  <Step title="Enable CSS classes">
+    In **Appearance > Menus**, click **Screen Options** (top right).
+    
+    Check the **CSS Classes** box.
+  </Step>
+  
+  <Step title="Add class to item">
+    Expand a menu item and enter class name in the **CSS Classes** field.
+  </Step>
+  
+  <Step title="Style in CSS">
+    Target the class in your stylesheet:
+    
+    ```css
+    .menu .my-custom-class {
+        color: red;
+    }
+    ```
+  </Step>
+</Steps>
+
+## Menu Walkers
+
+For advanced menu customization, use a custom walker class:
+
+```php
+class Zalbi_Custom_Walker extends Walker_Nav_Menu {
+    // Custom HTML structure
+}
+
+wp_nav_menu( array(
+    'theme_location' => 'menu-1',
+    'walker'         => new Zalbi_Custom_Walker(),
+) );
+```
+
+<Note>
+The theme does not currently use a custom walker, but this is available for future enhancements.
+</Note>
+
+## Programmatically Adding Menu Items
+
+To add items programmatically:
+
+```php
+function zalbi_add_custom_menu_item($items, $args) {
+    if ($args->theme_location == 'menu-1') {
+        $items .= '<li><a href="/custom-page">Custom Link</a></li>';
+    }
+    return $items;
+}
+add_filter('wp_nav_menu_items', 'zalbi_add_custom_menu_item', 10, 2);
+```
+
+## Checking if Menu Exists
+
+Use `has_nav_menu()` to check if a menu is assigned:
+
+```php
+if ( has_nav_menu( 'menu-1' ) ) {
+    // Display menu
+} else {
+    // Display fallback
+}
+```
+
+## Menu Item Attributes
+
+Available attributes for `wp_nav_menu()`:
+
+| Parameter | Description | Default |
+|-----------|-------------|----------|
+| `theme_location` | Registered menu location | None |
+| `menu` | Menu ID, slug, or name | None |
+| `menu_class` | CSS class for `<ul>` | `menu` |
+| `menu_id` | ID attribute for `<ul>` | Menu slug |
+| `container` | Wrapper element (`div`, `nav`, `false`) | `div` |
+| `container_class` | Class for container | None |
+| `container_id` | ID for container | None |
+| `depth` | How many levels to show | 0 (all) |
+| `fallback_cb` | Fallback function if menu missing | `wp_page_menu` |
+| `before` | HTML before link text | Empty |
+| `after` | HTML after link text | Empty |
+| `link_before` | HTML before link anchor | Empty |
+| `link_after` | HTML after link anchor | Empty |
+| `items_wrap` | Custom `<ul>` wrapper | Standard |
+| `walker` | Custom walker class | None |
+
+## Best Practices
+
+<Steps>
+  <Step title="Keep menus organized">
+    Limit primary menu to 5-7 top-level items for usability.
+  </Step>
+  
+  <Step title="Use descriptive labels">
+    Menu labels should be clear and concise.
+  </Step>
+  
+  <Step title="Test responsive behavior">
+    Verify mobile menu toggle works correctly.
+  </Step>
+  
+  <Step title="Maintain multilingual menus">
+    Keep Spanish and Basque menus synchronized.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordion title="Menu not appearing">
+  Check that:
+  - A menu is created in **Appearance > Menus**
+  - Menu is assigned to the correct location
+  - Template file calls `wp_nav_menu()` with correct `theme_location`
+  - No PHP errors in the template
+</Accordion>
+
+<Accordion title="Submenu not displaying">
+  - Verify menu items are properly indented (hierarchical)
+  - Check that `depth` parameter is not set to `1`
+  - Ensure CSS is not hiding submenus (`display: none`)
+  - Test with a default WordPress theme to rule out conflicts
+</Accordion>
+
+<Accordion title="Mobile menu not working">
+  - Verify `navigation.js` is enqueued (`functions.php:125`)
+  - Check browser console for JavaScript errors
+  - Ensure Font Awesome is loaded for hamburger icon
+  - Test button has correct `aria-controls="primary-menu"`
+</Accordion>
+
+## Related Pages
+
+- [Theme Customizer](/customization/theme-customizer)
+- [Theme Structure Overview](/structure/overview)

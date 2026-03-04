@@ -1,0 +1,278 @@
+---
+title: WhatsApp Button
+description: Configure and customize the floating WhatsApp button in Zalbi Theme
+---
+
+Zalbi Theme includes a floating WhatsApp button that allows visitors to quickly initiate conversations. The button is fully configurable through the WordPress Customizer.
+
+## Features
+
+- Floating button fixed at bottom-right corner
+- Customizable phone number via WordPress Customizer
+- Automatic hide when number is empty
+- Pre-filled message based on current language (ES/EU)
+- Responsive design with hover effects
+- Official WhatsApp colors and Font Awesome icon
+
+## Configuration
+
+### Accessing the Settings
+
+<Steps>
+  <Step title="Open WordPress Customizer">
+    Navigate to **Appearance > Customize** in your WordPress admin panel.
+  </Step>
+  
+  <Step title="Find WhatsApp Section">
+    Scroll down to find the **Botón WhatsApp** section (priority 120, near the bottom).
+  </Step>
+  
+  <Step title="Enter Phone Number">
+    Enter the phone number with country code (e.g., `34658887358` for Spain).
+    
+    <Note>
+    Do not include the `+` symbol, spaces, or dashes. Just digits.
+    </Note>
+  </Step>
+  
+  <Step title="Publish Changes">
+    Click **Publish** to save your changes.
+  </Step>
+</Steps>
+
+### Removing the Button
+
+To hide the WhatsApp button, simply leave the phone number field empty in the Customizer.
+
+## Implementation
+
+### Customizer Registration
+
+The WhatsApp section is registered in `functions.php:186-208`:
+
+```php functions.php
+function zalbi_customize_whatsapp($wp_customize) {
+    
+    $wp_customize->add_section('zalbi_whatsapp_section', array(
+        'title'       => __('Botón WhatsApp', 'zalbi'),
+        'description' => __('Configura aquí el número del botón flotante.', 'zalbi'),
+        'priority'    => 120,
+    ));
+
+    $wp_customize->add_setting('zalbi_whatsapp_number', array(
+        'default'           => '',
+        'transport'         => 'refresh',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+
+    $wp_customize->add_control('zalbi_whatsapp_number', array(
+        'label'       => __('Número de teléfono', 'zalbi'),
+        'section'     => 'zalbi_whatsapp_section',
+        'type'        => 'text',
+        'description' => 'Escribe el número con prefijo (ej: 34658887358). Si lo dejas vacío, el botón desaparece.',
+    ));
+}
+add_action('customize_register', 'zalbi_customize_whatsapp');
+```
+
+### Template Output
+
+The button is rendered in `footer.php:123-140`:
+
+```php footer.php
+<?php 
+/* --- LÓGICA DEL BOTÓN DE WHATSAPP --- */
+$whatsapp_number = get_theme_mod('zalbi_whatsapp_number'); 
+
+if ( ! empty($whatsapp_number) ) : 
+    // Encode message for URL
+    $wa_msg_encoded = rawurlencode($wa_msg);
+?>
+
+    <a href="https://wa.me/<?php echo esc_attr($whatsapp_number); ?>?text=<?php echo $wa_msg_encoded; ?>" 
+       class="whatsapp-btn" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       aria-label="WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+<?php endif; ?>
+```
+
+<Note>
+The `$wa_msg` variable is set earlier in `footer.php:26` (Spanish) and `footer.php:42` (Basque) based on the current language detected by Polylang.
+</Note>
+
+## Styling
+
+The WhatsApp button styling is defined in `style.css:1621-1646`:
+
+```css style.css
+.whatsapp-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #25D366; /* Official WhatsApp green */
+    color: #ffffff !important;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 45px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 10000;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.whatsapp-btn:hover {
+    background-color: #128C7E; /* Darker on hover */
+    transform: scale(1.1);
+    cursor: pointer;
+}
+```
+
+### Responsive Adjustments
+
+On smaller screens (`style.css:1875`), the button positioning may be adjusted:
+
+```css
+@media (max-width: 768px) {
+    .whatsapp-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 35px;
+    }
+}
+```
+
+## Multilingual Messages
+
+The pre-filled message changes based on the current language:
+
+<Accordion title="Spanish (ES)">
+  ```php
+  $wa_msg = 'Hola, quisiera información';
+  ```
+  
+  Translation: "Hello, I would like information"
+</Accordion>
+
+<Accordion title="Basque (EU)">
+  ```php
+  $wa_msg = 'Kaixo, informazioa nahi nuke';
+  ```
+  
+  Translation: "Hello, I would like information"
+</Accordion>
+
+## Customization Options
+
+### Change Button Position
+
+Modify the `bottom` and `right` properties in `style.css`:
+
+```css
+.whatsapp-btn {
+    bottom: 20px;  /* Distance from bottom */
+    right: 20px;   /* Distance from right */
+}
+```
+
+### Change Button Size
+
+Adjust `width`, `height`, and `font-size`:
+
+```css
+.whatsapp-btn {
+    width: 70px;
+    height: 70px;
+    font-size: 50px;
+}
+```
+
+### Change Colors
+
+Modify `background-color` for different branding:
+
+```css
+.whatsapp-btn {
+    background-color: #128C7E; /* Darker green */
+}
+
+.whatsapp-btn:hover {
+    background-color: #075E54; /* Even darker on hover */
+}
+```
+
+<Warning>
+Using the official WhatsApp colors (#25D366) is recommended for brand recognition.
+</Warning>
+
+### Custom Messages
+
+To customize the pre-filled message, edit `footer.php:26` (Spanish) or `footer.php:42` (Basque):
+
+```php
+$wa_msg = 'Your custom message here';
+```
+
+## Accessibility
+
+The button includes proper accessibility attributes:
+
+- `aria-label="WhatsApp"` - Screen reader label
+- `rel="noopener noreferrer"` - Security for external links
+- `target="_blank"` - Opens in new tab
+
+## Best Practices
+
+<Steps>
+  <Step title="Use full international format">
+    Always include country code: `34658887358` (not `658887358`)
+  </Step>
+  
+  <Step title="Test the button">
+    Click the button after configuration to ensure it opens WhatsApp correctly
+  </Step>
+  
+  <Step title="Keep messages brief">
+    Pre-filled messages should be short and professional
+  </Step>
+  
+  <Step title="Monitor z-index">
+    The button uses `z-index: 10000` to stay on top of all content
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordion title="Button not appearing">
+  Check that:
+  - Phone number is entered in the Customizer
+  - Number contains only digits (no spaces, dashes, or +)
+  - Font Awesome is loaded (`functions.php:128`)
+  - CSS is properly enqueued
+</Accordion>
+
+<Accordion title="Button opens wrong number">
+  - Verify the number in **Appearance > Customize > Botón WhatsApp**
+  - Clear browser cache and hard refresh (Ctrl+F5)
+  - Check for JavaScript errors in browser console
+</Accordion>
+
+<Accordion title="Button positioning issues">
+  - Check for CSS conflicts with other plugins
+  - Verify `z-index` value is high enough
+  - Test on different screen sizes for responsive behavior
+</Accordion>
+
+## Related Pages
+
+- [Theme Customizer](/customization/theme-customizer)
+- [Theme Structure Overview](/structure/overview)

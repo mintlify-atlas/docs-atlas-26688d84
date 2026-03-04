@@ -1,0 +1,740 @@
+---
+title: "Template Tags"
+description: "Template tag functions for displaying post metadata, thumbnails, and content"
+icon: "tags"
+---
+
+## Overview
+
+Template tags are helper functions used in theme templates to display post metadata, author information, timestamps, categories, tags, and featured images. These functions are located in `/inc/template-tags.php`.
+
+<Note>
+All template tag functions check for existence using `function_exists()` to allow child themes to override them.
+</Note>
+
+---
+
+## zalbi_posted_on()
+
+Prints HTML with meta information for the current post's publication and modification dates.
+
+### Function Signature
+
+```php
+function zalbi_posted_on()
+```
+
+### Parameters
+
+None (uses global `$post` object)
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Echoes HTML directly to output
+</ResponseField>
+
+### Output
+
+Displays formatted date with:
+- Publication date (always shown)
+- Modification date (shown separately if post was updated)
+- Microdata-compatible `<time>` elements with W3C date format
+- Link to post permalink
+
+### Implementation
+
+```php
+function zalbi_posted_on() {
+    $time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
+    if ( get_the_time( 'U' ) !== get_the_modified_time( 'U' ) ) {
+        $time_string = '<time class="entry-date published" datetime="%1$s">%2$s</time><time class="updated" datetime="%3$s">%4$s</time>';
+    }
+
+    $time_string = sprintf(
+        $time_string,
+        esc_attr( get_the_date( DATE_W3C ) ),
+        esc_html( get_the_date() ),
+        esc_attr( get_the_modified_date( DATE_W3C ) ),
+        esc_html( get_the_modified_date() )
+    );
+
+    $posted_on = sprintf(
+        esc_html_x( 'Posted on %s', 'post date', 'zalbi' ),
+        '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">' . $time_string . '</a>'
+    );
+
+    echo '<span class="posted-on">' . $posted_on . '</span>';
+}
+```
+
+### Usage
+
+```php
+// In a template file (e.g., single.php, content.php)
+<div class="entry-meta">
+    <?php zalbi_posted_on(); ?>
+</div>
+```
+
+### Output Example
+
+```html
+<span class="posted-on">
+    Posted on 
+    <a href="https://example.com/post-slug/" rel="bookmark">
+        <time class="entry-date published" datetime="2026-03-04T10:30:00+00:00">
+            March 4, 2026
+        </time>
+        <time class="updated" datetime="2026-03-05T14:20:00+00:00">
+            March 5, 2026
+        </time>
+    </a>
+</span>
+```
+
+### CSS Classes
+
+<ResponseField name="posted-on" type="class">
+  Wrapper span for the entire date output
+</ResponseField>
+
+<ResponseField name="entry-date" type="class">
+  Applied to the `<time>` element
+</ResponseField>
+
+<ResponseField name="published" type="class">
+  Original publication date
+</ResponseField>
+
+<ResponseField name="updated" type="class">
+  Last modification date (only if different from published)
+</ResponseField>
+
+<Tip>
+The function automatically detects if a post has been modified and shows both dates for SEO purposes.
+</Tip>
+
+---
+
+## zalbi_posted_by()
+
+Prints HTML with meta information for the current post's author.
+
+### Function Signature
+
+```php
+function zalbi_posted_by()
+```
+
+### Parameters
+
+None (uses global `$post` object)
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Echoes HTML directly to output
+</ResponseField>
+
+### Output
+
+Displays:
+- Author name with link to author archive
+- Microdata-compatible markup with hCard classes
+- Translatable "by" prefix
+
+### Implementation
+
+```php
+function zalbi_posted_by() {
+    $byline = sprintf(
+        esc_html_x( 'by %s', 'post author', 'zalbi' ),
+        '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author() ) . '</a></span>'
+    );
+
+    echo '<span class="byline"> ' . $byline . '</span>';
+}
+```
+
+### Usage
+
+```php
+// Display author info in template
+<div class="entry-meta">
+    <?php 
+    zalbi_posted_on();
+    zalbi_posted_by();
+    ?>
+</div>
+```
+
+### Output Example
+
+```html
+<span class="byline">
+    by 
+    <span class="author vcard">
+        <a class="url fn n" href="https://example.com/author/john-doe/">
+            John Doe
+        </a>
+    </span>
+</span>
+```
+
+### CSS Classes
+
+<ResponseField name="byline" type="class">
+  Wrapper span for author information
+</ResponseField>
+
+<ResponseField name="author vcard" type="class">
+  hCard microformat for author (SEO)
+</ResponseField>
+
+<ResponseField name="url fn n" type="class">
+  Microformat classes for author link
+</ResponseField>
+
+### Microformats
+
+This function uses [hCard microformat](http://microformats.org/wiki/hcard) classes for better SEO:
+- `vcard` - Indicates contact information
+- `url` - Author URL
+- `fn` - Formatted name
+- `n` - Name
+
+---
+
+## zalbi_entry_footer()
+
+Prints HTML with metadata for categories, tags, comments link, and edit link in the post footer.
+
+### Function Signature
+
+```php
+function zalbi_entry_footer()
+```
+
+### Parameters
+
+None (uses global `$post` object)
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Echoes HTML directly to output
+</ResponseField>
+
+### What It Displays
+
+<AccordionGroup>
+  <Accordion title="For Blog Posts">
+    - **Categories**: Comma-separated list with links
+    - **Tags**: Comma-separated list with links
+    - **Comments Link**: If on archive and comments are open
+    - **Edit Link**: For logged-in users with edit permissions
+  </Accordion>
+
+  <Accordion title="For Pages & Custom Post Types">
+    - **Comments Link**: If comments are enabled
+    - **Edit Link**: For logged-in users with edit permissions
+    - **No categories or tags** (hidden for non-post types)
+  </Accordion>
+</AccordionGroup>
+
+### Implementation
+
+```php
+function zalbi_entry_footer() {
+    // Hide category and tag text for pages.
+    if ( 'post' === get_post_type() ) {
+        $categories_list = get_the_category_list( esc_html__( ', ', 'zalbi' ) );
+        if ( $categories_list ) {
+            printf( '<span class="cat-links">' . esc_html__( 'Posted in %1$s', 'zalbi' ) . '</span>', $categories_list );
+        }
+
+        $tags_list = get_the_tag_list( '', esc_html_x( ', ', 'list item separator', 'zalbi' ) );
+        if ( $tags_list ) {
+            printf( '<span class="tags-links">' . esc_html__( 'Tagged %1$s', 'zalbi' ) . '</span>', $tags_list );
+        }
+    }
+
+    if ( ! is_single() && ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
+        echo '<span class="comments-link">';
+        comments_popup_link(
+            sprintf(
+                wp_kses(
+                    __( 'Leave a Comment<span class="screen-reader-text"> on %s</span>', 'zalbi' ),
+                    array( 'span' => array( 'class' => array() ) )
+                ),
+                wp_kses_post( get_the_title() )
+            )
+        );
+        echo '</span>';
+    }
+
+    edit_post_link(
+        sprintf(
+            wp_kses(
+                __( 'Edit <span class="screen-reader-text">%s</span>', 'zalbi' ),
+                array( 'span' => array( 'class' => array() ) )
+            ),
+            wp_kses_post( get_the_title() )
+        ),
+        '<span class="edit-link">',
+        '</span>'
+    );
+}
+```
+
+### Usage
+
+```php
+// In content template files
+<footer class="entry-footer">
+    <?php zalbi_entry_footer(); ?>
+</footer>
+```
+
+### Output Example
+
+```html
+<footer class="entry-footer">
+    <span class="cat-links">
+        Posted in <a href="/category/news/">News</a>, <a href="/category/updates/">Updates</a>
+    </span>
+    <span class="tags-links">
+        Tagged <a href="/tag/wordpress/">WordPress</a>, <a href="/tag/themes/">Themes</a>
+    </span>
+    <span class="comments-link">
+        <a href="/post-slug/#respond">Leave a Comment<span class="screen-reader-text"> on Post Title</span></a>
+    </span>
+    <span class="edit-link">
+        <a href="/wp-admin/post.php?post=123&action=edit">Edit <span class="screen-reader-text">Post Title</span></a>
+    </span>
+</footer>
+```
+
+### CSS Classes
+
+<ResponseField name="cat-links" type="class">
+  Wrapper for category links
+</ResponseField>
+
+<ResponseField name="tags-links" type="class">
+  Wrapper for tag links
+</ResponseField>
+
+<ResponseField name="comments-link" type="class">
+  Wrapper for comments link
+</ResponseField>
+
+<ResponseField name="edit-link" type="class">
+  Wrapper for edit post link
+</ResponseField>
+
+<ResponseField name="screen-reader-text" type="class">
+  Accessibility text (visually hidden)
+</ResponseField>
+
+<Info>
+**Accessibility**: The function includes screen-reader-only text with post titles for better context.
+</Info>
+
+---
+
+## zalbi_post_thumbnail()
+
+Displays an optional post thumbnail (featured image) with different markup for singular and archive views.
+
+### Function Signature
+
+```php
+function zalbi_post_thumbnail()
+```
+
+### Parameters
+
+None (uses global `$post` object)
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Echoes HTML directly to output, or returns early if no thumbnail
+</ResponseField>
+
+### Behavior
+
+<CardGroup cols={2}>
+  <Card title="Singular Views" icon="file">
+    Wraps thumbnail in a `<div>` (no link)
+  </Card>
+  <Card title="Archive Views" icon="list">
+    Wraps thumbnail in an `<a>` tag linking to post
+  </Card>
+  <Card title="Password Protected" icon="lock">
+    Returns early - no thumbnail shown
+  </Card>
+  <Card title="No Featured Image" icon="image-slash">
+    Returns early - nothing displayed
+  </Card>
+</CardGroup>
+
+### Implementation
+
+```php
+function zalbi_post_thumbnail() {
+    if ( post_password_required() || is_attachment() || ! has_post_thumbnail() ) {
+        return;
+    }
+
+    if ( is_singular() ) :
+        ?>
+        <div class="post-thumbnail">
+            <?php the_post_thumbnail(); ?>
+        </div><!-- .post-thumbnail -->
+    <?php else : ?>
+        <a class="post-thumbnail" href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
+            <?php
+                the_post_thumbnail(
+                    'post-thumbnail',
+                    array(
+                        'alt' => the_title_attribute(
+                            array( 'echo' => false )
+                        ),
+                    )
+                );
+            ?>
+        </a>
+        <?php
+    endif;
+}
+```
+
+### Usage
+
+```php
+// In single.php or content.php
+<article>
+    <header class="entry-header">
+        <?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+    </header>
+    
+    <?php zalbi_post_thumbnail(); ?>
+    
+    <div class="entry-content">
+        <?php the_content(); ?>
+    </div>
+</article>
+```
+
+### Output Examples
+
+<CodeGroup>
+
+```html Singular View
+<div class="post-thumbnail">
+    <img width="1200" height="800" 
+         src="https://example.com/wp-content/uploads/image.jpg" 
+         class="attachment-post-thumbnail size-post-thumbnail wp-post-image" 
+         alt="Post Title" />
+</div>
+```
+
+```html Archive View
+<a class="post-thumbnail" 
+   href="https://example.com/post-slug/" 
+   aria-hidden="true" 
+   tabindex="-1">
+    <img width="1200" height="800" 
+         src="https://example.com/wp-content/uploads/image.jpg" 
+         class="attachment-post-thumbnail size-post-thumbnail wp-post-image" 
+         alt="Post Title" />
+</a>
+```
+
+</CodeGroup>
+
+### Accessibility Features
+
+<AccordionGroup>
+  <Accordion title="Archive Link Attributes">
+    - `aria-hidden="true"` - Hides from screen readers (title link is primary)
+    - `tabindex="-1"` - Removes from keyboard navigation
+    - Prevents duplicate links to the same post
+  </Accordion>
+
+  <Accordion title="Alt Text">
+    - Uses `the_title_attribute()` for proper alt text
+    - Ensures images are descriptive for screen readers
+  </Accordion>
+</AccordionGroup>
+
+### Conditional Display
+
+The function exits early if:
+
+<Steps>
+  <Step title="Password Protected">
+    `post_password_required()` returns true
+  </Step>
+  <Step title="Attachment Page">
+    `is_attachment()` returns true
+  </Step>
+  <Step title="No Thumbnail">
+    `has_post_thumbnail()` returns false
+  </Step>
+</Steps>
+
+### Customization
+
+```php
+// Override in child theme
+function zalbi_post_thumbnail() {
+    if ( ! has_post_thumbnail() ) {
+        return;
+    }
+    
+    // Custom thumbnail size
+    the_post_thumbnail( 'large', array(
+        'class' => 'custom-thumbnail',
+    ));
+}
+```
+
+<Tip>
+**Performance**: The function uses `has_post_thumbnail()` to avoid unnecessary database queries when no featured image is set.
+</Tip>
+
+---
+
+## wp_body_open()
+
+Backward compatibility shim for WordPress sites older than version 5.2. Provides the `wp_body_open` action hook.
+
+### Function Signature
+
+```php
+function wp_body_open()
+```
+
+### Parameters
+
+None
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Fires the `wp_body_open` action hook
+</ResponseField>
+
+### Purpose
+
+<Warning>
+**WordPress Core Function**: This is a polyfill for `wp_body_open()` which became a core function in WordPress 5.2. This shim ensures compatibility with older WordPress versions.
+</Warning>
+
+The `wp_body_open` action allows plugins to inject code immediately after the opening `<body>` tag, which is useful for:
+- Analytics scripts (Google Tag Manager)
+- Accessibility tools
+- Cookie consent banners
+- Skip navigation links
+
+### Implementation
+
+```php
+if ( ! function_exists( 'wp_body_open' ) ) :
+    /**
+     * Shim for sites older than 5.2.
+     *
+     * @link https://core.trac.wordpress.org/ticket/12563
+     */
+    function wp_body_open() {
+        do_action( 'wp_body_open' );
+    }
+endif;
+```
+
+### Usage in Templates
+
+```php
+<!-- header.php -->
+<!DOCTYPE html>
+<html <?php language_attributes(); ?>>
+<head>
+    <meta charset="<?php bloginfo( 'charset' ); ?>">
+    <?php wp_head(); ?>
+</head>
+<body <?php body_class(); ?>>
+<?php wp_body_open(); ?>
+
+<div id="page" class="site">
+    <!-- Rest of header -->
+```
+
+### Hook Usage
+
+Plugins can hook into this action:
+
+```php
+// Plugin or functions.php
+add_action( 'wp_body_open', function() {
+    echo '<div class="skip-link"><a href="#content">Skip to content</a></div>';
+});
+
+// Google Tag Manager
+add_action( 'wp_body_open', function() {
+    ?>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <?php
+});
+```
+
+<Info>
+**Modern WordPress**: If your site runs WordPress 5.2+, this shim is never loaded and the core function is used instead.
+</Info>
+
+---
+
+## Best Practices
+
+### Template Integration
+
+<AccordionGroup>
+  <Accordion title="Blog Post Template">
+    ```php
+    <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+        <header class="entry-header">
+            <?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+            
+            <div class="entry-meta">
+                <?php
+                zalbi_posted_on();
+                zalbi_posted_by();
+                ?>
+            </div>
+        </header>
+
+        <?php zalbi_post_thumbnail(); ?>
+
+        <div class="entry-content">
+            <?php the_content(); ?>
+        </div>
+
+        <footer class="entry-footer">
+            <?php zalbi_entry_footer(); ?>
+        </footer>
+    </article>
+    ```
+  </Accordion>
+
+  <Accordion title="Archive/Loop Template">
+    ```php
+    <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+        <?php zalbi_post_thumbnail(); ?>
+        
+        <header class="entry-header">
+            <?php the_title( sprintf( '<h2 class="entry-title"><a href="%s">', esc_url( get_permalink() ) ), '</a></h2>' ); ?>
+            
+            <div class="entry-meta">
+                <?php zalbi_posted_on(); ?>
+            </div>
+        </header>
+
+        <div class="entry-summary">
+            <?php the_excerpt(); ?>
+        </div>
+
+        <footer class="entry-footer">
+            <?php zalbi_entry_footer(); ?>
+        </footer>
+    </article>
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Styling Hooks
+
+All template tags output semantic HTML with specific CSS classes for easy styling:
+
+```css
+/* Post meta styling */
+.entry-meta {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.posted-on,
+.byline {
+    margin-right: 1rem;
+}
+
+.posted-on a,
+.byline a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Entry footer */
+.entry-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.cat-links,
+.tags-links,
+.comments-link,
+.edit-link {
+    margin-right: 1rem;
+}
+
+/* Post thumbnail */
+.post-thumbnail {
+    margin-bottom: 1.5rem;
+}
+
+.post-thumbnail img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+```
+
+---
+
+## Overriding Template Tags
+
+All functions use `function_exists()` checks, allowing child themes to override them:
+
+```php
+// Child theme functions.php
+
+// Custom posted_on without modification date
+function zalbi_posted_on() {
+    $posted_on = sprintf(
+        esc_html_x( 'Posted %s', 'post date', 'zalbi' ),
+        '<time class="entry-date published" datetime="' . esc_attr( get_the_date( DATE_W3C ) ) . '">' . 
+        esc_html( get_the_date() ) . '</time>'
+    );
+    echo '<span class="posted-on">' . $posted_on . '</span>';
+}
+
+// Custom thumbnail with default placeholder
+function zalbi_post_thumbnail() {
+    if ( has_post_thumbnail() ) {
+        the_post_thumbnail( 'large' );
+    } else {
+        echo '<img src="' . get_stylesheet_directory_uri() . '/images/placeholder.jpg" alt="Placeholder">';
+    }
+}
+```
+
+<Card title="Next Steps" icon="arrow-right" href="/api/customizer-functions">
+  Explore Customizer functions for theme settings and live preview
+</Card>

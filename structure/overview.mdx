@@ -1,0 +1,211 @@
+---
+title: Theme Architecture Overview
+description: Understanding the structure and organization of Zalbi Theme
+---
+
+Zalbi Theme is a custom WordPress theme built for inflatable rentals and event management. Based on the [Underscores (_s)](https://underscores.me/) starter theme, it follows WordPress best practices while implementing specialized features for the rental business.
+
+## Architecture Foundation
+
+Zalbi Theme is built on the Underscores (_s) framework, which provides:
+
+- Clean, semantic HTML5 markup
+- Mobile-first responsive design
+- Accessibility-ready structure
+- Translation-ready codebase
+- Modular component architecture
+
+<Note>
+The theme is specifically designed for bilingual support (Spanish/Euskera) using Polylang, with custom implementations throughout the codebase.
+</Note>
+
+## Directory Structure
+
+The theme follows a standard WordPress theme structure with custom additions:
+
+```
+zalbi-theme/
+├── inc/                    # Core functionality modules
+├── template-parts/         # Reusable template components
+├── js/                     # JavaScript files
+├── img/                    # Theme images and assets
+├── languages/              # Translation files
+├── _zalbi/                 # Legacy/backup files
+├── functions.php           # Theme setup and configuration
+├── style.css              # Main stylesheet and theme metadata
+├── style-rtl.css          # Right-to-left language support
+└── [template files]        # WordPress template hierarchy files
+```
+
+## Core Components
+
+### 1. Theme Configuration
+
+<Accordion title="functions.php (236 lines)">
+The main configuration file that handles:
+
+- **Theme Setup**: Text domain, feed links, title tag, post thumbnails
+- **Navigation Menus**: Primary menu and legal footer menu
+- **Custom Post Types**: 
+  - `hinchable` (Inflatables) - slug: `catalogo`
+  - `evento` (Events) - slug: `eventos`
+- **Custom Taxonomies**: `tipo_hinchable` for categorizing inflatables
+- **Widget Areas**: Sidebar registration
+- **Asset Enqueuing**: Styles and scripts (Font Awesome, Google Fonts)
+- **WhatsApp Integration**: Customizer settings for floating WhatsApp button
+
+Location: `functions.php:1`
+</Accordion>
+
+### 2. Include Files (`inc/`)
+
+Modular functionality is organized in the `inc/` directory:
+
+<CardGroup cols={2}>
+  <Card title="template-tags.php" icon="tag">
+    Custom template tags for displaying post metadata:
+    - `zalbi_posted_on()` - Post date display
+    - `zalbi_posted_by()` - Author information
+    - `zalbi_entry_footer()` - Post footer metadata
+  </Card>
+  
+  <Card title="template-functions.php" icon="code">
+    Helper functions that enhance theme functionality:
+    - Body class modifications
+    - Pingback header additions
+  </Card>
+  
+  <Card title="customizer.php" icon="sliders">
+    WordPress Customizer integration for theme options and live preview
+  </Card>
+  
+  <Card title="custom-header.php" icon="image">
+    Custom header image implementation and configuration
+  </Card>
+  
+  <Card title="jetpack.php" icon="puzzle-piece">
+    Jetpack plugin compatibility layer (loaded conditionally)
+  </Card>
+</CardGroup>
+
+### 3. Template Parts (`template-parts/`)
+
+Reusable content templates for different contexts:
+
+- `content.php` - Default post content display
+- `content-page.php` - Page content layout
+- `content-search.php` - Search results formatting
+- `content-none.php` - No results found message
+
+### 4. JavaScript (`js/`)
+
+Client-side functionality:
+
+- `navigation.js` - Mobile menu toggle and keyboard navigation
+- `customizer.js` - Live preview updates in the Customizer
+
+### 5. Assets
+
+- **Images** (`img/`): Theme logo (`logo.webp`)
+- **Translations** (`languages/`): POT file for internationalization
+
+## Custom Post Types
+
+<Info>
+Zalbi Theme implements two custom post types specifically designed for the rental business:
+</Info>
+
+### Hinchables (Inflatables)
+
+```php
+'hinchable' // Post type name
+'catalogo'  // URL slug (SEO-friendly)
+```
+
+**Features**:
+- Custom fields via ACF (Advanced Custom Fields)
+- Custom taxonomy: `tipo_hinchable` (inflatable types)
+- Dedicated template: `single-hinchable.php`
+- Archive page: `page-catalogo.php`
+
+Registered in: `functions.php:138`
+
+### Eventos (Events)
+
+```php
+'evento'   // Post type name
+'eventos'  // URL slug
+```
+
+**Features**:
+- Event-specific content structure
+- Dedicated template: `single-evento.php`
+- Archive page: `page-eventos.php`
+
+Registered in: `functions.php:171`
+
+## Bilingual Support
+
+The theme is designed to work with Polylang for Spanish/Euskera translations:
+
+- Translation domain: `zalbi`
+- POT file: `languages/zalbi.pot`
+- Text domain loaded in: `functions.php:22`
+- Language detection throughout templates using `pll_current_language()`
+
+## External Dependencies
+
+<CardGroup cols={2}>
+  <Card title="Font Awesome 6.4.0" icon="font-awesome">
+    Icon library loaded via CDN for UI elements
+  </Card>
+  
+  <Card title="Google Fonts" icon="google">
+    - **Nunito**: 400, 700, 900 weights
+    - **Open Sans**: 400, 600 weights
+  </Card>
+  
+  <Card title="Advanced Custom Fields (ACF)" icon="input-text">
+    Used for custom fields in Hinchables:
+    - Measurements (`medidas`)
+    - Capacity (`capacidad`)
+    - Color tags (`etiqueta_color`)
+  </Card>
+  
+  <Card title="Polylang" icon="language">
+    Multilingual support for Spanish and Euskera (Basque)
+  </Card>
+</CardGroup>
+
+## Theme Metadata
+
+Defined in `style.css` header:
+
+- **Theme Name**: zalbi-theme
+- **Version**: 1.0.0
+- **Author**: Yeray Garrido
+- **Text Domain**: zalbi
+- **Requires PHP**: 5.6
+- **Tested up to**: WordPress 5.4
+- **License**: GPL v2 or later
+
+## Design Philosophy
+
+1. **Mobile-First**: Responsive design with mobile navigation
+2. **Accessibility**: Semantic HTML5 and ARIA support
+3. **Modularity**: Separation of concerns with include files
+4. **Customization**: WordPress Customizer integration
+5. **Performance**: Minimal dependencies, optimized asset loading
+6. **SEO-Friendly**: Clean URLs, proper heading hierarchy
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Template Hierarchy" icon="sitemap" href="./template-hierarchy">
+    Learn how WordPress selects templates in Zalbi Theme
+  </Card>
+  
+  <Card title="File Organization" icon="folder-tree" href="./file-organization">
+    Detailed breakdown of every file and directory
+  </Card>
+</CardGroup>

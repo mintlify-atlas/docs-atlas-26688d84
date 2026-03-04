@@ -1,0 +1,195 @@
+---
+title: Theme Customizer
+description: WordPress Theme Customizer integration and custom sections in Zalbi Theme
+---
+
+Zalbi Theme extends the WordPress Theme Customizer with custom sections and settings, providing a user-friendly interface for site configuration.
+
+## Standard WordPress Settings
+
+The theme integrates with WordPress core customizer features:
+
+### Site Identity
+
+- **Site Title & Tagline** - Displayed with selective refresh (no page reload)
+- **Custom Logo** - Flexible dimensions (250x250px default, flex-width and flex-height enabled)
+- **Site Icon** - Favicon and app icon
+
+### Colors
+
+- **Custom Background** - Default white background with image support
+- **Header Text Color** - Change header text color with live preview
+
+## Custom Sections
+
+### WhatsApp Button Section
+
+The theme adds a custom "Botón WhatsApp" section for configuring the floating WhatsApp button.
+
+<Note>
+This is the primary custom section added to the WordPress Customizer. See the [WhatsApp Button](/customization/whatsapp-button) page for detailed configuration.
+</Note>
+
+## Customizer Implementation
+
+The theme uses two customizer hooks:
+
+### Selective Refresh
+
+For better user experience, the theme enables selective refresh for site identity elements:
+
+```php functions.php
+function zalbi_customize_register( $wp_customize ) {
+    $wp_customize->get_setting( 'blogname' )->transport = 'postMessage';
+    $wp_customize->get_setting( 'blogdescription' )->transport = 'postMessage';
+    $wp_customize->get_setting( 'header_textcolor' )->transport = 'postMessage';
+
+    if ( isset( $wp_customize->selective_refresh ) ) {
+        $wp_customize->selective_refresh->add_partial(
+            'blogname',
+            array(
+                'selector'        => '.site-title a',
+                'render_callback' => 'zalbi_customize_partial_blogname',
+            )
+        );
+        $wp_customize->selective_refresh->add_partial(
+            'blogdescription',
+            array(
+                'selector'        => '.site-description',
+                'render_callback' => 'zalbi_customize_partial_blogdescription',
+            )
+        );
+    }
+}
+add_action( 'customize_register', 'zalbi_customize_register' );
+```
+
+**Location:** `inc/customizer.php:13-35`
+
+### Custom Sections
+
+Custom sections are registered using the `customize_register` action:
+
+```php functions.php
+function zalbi_customize_whatsapp($wp_customize) {
+    $wp_customize->add_section('zalbi_whatsapp_section', array(
+        'title'       => __('Botón WhatsApp', 'zalbi'),
+        'description' => __('Configura aquí el número del botón flotante.', 'zalbi'),
+        'priority'    => 120,
+    ));
+    
+    // Settings and controls...
+}
+add_action('customize_register', 'zalbi_customize_whatsapp');
+```
+
+**Location:** `functions.php:186-208`
+
+## Accessing Settings in Templates
+
+Retrieve customizer settings using `get_theme_mod()`:
+
+```php
+$whatsapp_number = get_theme_mod('zalbi_whatsapp_number');
+
+if ( ! empty($whatsapp_number) ) {
+    // Use the setting
+}
+```
+
+## JavaScript Integration
+
+The theme includes customizer preview JavaScript for live updates:
+
+```php inc/customizer.php
+function zalbi_customize_preview_js() {
+    wp_enqueue_script( 
+        'zalbi-customizer', 
+        get_template_directory_uri() . '/js/customizer.js', 
+        array( 'customize-preview' ), 
+        _S_VERSION, 
+        true 
+    );
+}
+add_action( 'customize_preview_init', 'zalbi_customize_preview_js' );
+```
+
+**Location:** `inc/customizer.php:58-61`
+
+## Adding New Sections
+
+To add a new customizer section:
+
+<Steps>
+  <Step title="Create the section">
+    Use `$wp_customize->add_section()` in a function hooked to `customize_register`:
+    
+    ```php
+    function my_custom_section($wp_customize) {
+        $wp_customize->add_section('my_section', array(
+            'title'       => __('My Section', 'zalbi'),
+            'description' => __('Section description', 'zalbi'),
+            'priority'    => 130,
+        ));
+    }
+    add_action('customize_register', 'my_custom_section');
+    ```
+  </Step>
+  
+  <Step title="Add settings">
+    Register settings with sanitization:
+    
+    ```php
+    $wp_customize->add_setting('my_setting', array(
+        'default'           => '',
+        'transport'         => 'refresh',
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    ```
+  </Step>
+  
+  <Step title="Add controls">
+    Create the UI control:
+    
+    ```php
+    $wp_customize->add_control('my_setting', array(
+        'label'       => __('My Setting', 'zalbi'),
+        'section'     => 'my_section',
+        'type'        => 'text',
+    ));
+    ```
+  </Step>
+</Steps>
+
+## Available Control Types
+
+- `text` - Single line text input
+- `textarea` - Multi-line text input
+- `checkbox` - Checkbox
+- `radio` - Radio buttons
+- `select` - Dropdown select
+- `number` - Number input
+- `email` - Email input
+- `url` - URL input
+- `color` - Color picker
+- `upload` - File upload
+
+## Sanitization Callbacks
+
+Always use appropriate sanitization:
+
+- `sanitize_text_field` - Text fields
+- `sanitize_email` - Email addresses
+- `esc_url_raw` - URLs
+- `absint` - Positive integers
+- `wp_kses_post` - HTML content
+
+<Warning>
+Always sanitize user input from the customizer to prevent security vulnerabilities.
+</Warning>
+
+## Related Pages
+
+- [WhatsApp Button Configuration](/customization/whatsapp-button)
+- [Menu Customization](/customization/menus)
+- [Theme Setup Functions](/api/theme-setup)

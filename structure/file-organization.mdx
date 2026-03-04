@@ -1,0 +1,881 @@
+---
+title: File Organization
+description: Complete reference for every file and directory in Zalbi Theme
+---
+
+This guide provides a comprehensive breakdown of every file and directory in Zalbi Theme, including their purpose, key functions, and relationships.
+
+## Complete Directory Tree
+
+```
+zalbi-theme/
+├── inc/                          # Core functionality modules
+│   ├── custom-header.php         # Custom header implementation
+│   ├── customizer.php            # WordPress Customizer settings
+│   ├── jetpack.php               # Jetpack compatibility
+│   ├── template-functions.php    # Helper functions
+│   └── template-tags.php         # Custom template tags
+│
+├── template-parts/               # Reusable template components
+│   ├── content.php               # Default post content
+│   ├── content-page.php          # Page content layout
+│   ├── content-search.php        # Search result formatting
+│   └── content-none.php          # No results message
+│
+├── js/                           # JavaScript files
+│   ├── navigation.js             # Mobile menu & keyboard nav
+│   ├── navigation copy 1.js      # Legacy/backup file
+│   └── customizer.js             # Live preview for Customizer
+│
+├── img/                          # Theme images
+│   └── logo.webp                 # Zalbi logo (994KB)
+│
+├── languages/                    # Translation files
+│   ├── zalbi.pot                 # Translation template
+│   └── readme.txt                # Translation instructions
+│
+├── _zalbi/                       # Legacy backup directory
+│   └── [mirror of theme files]   # Previous version backup
+│
+├── Template Files (Root)
+├── front-page.php                # Homepage template
+├── single-hinchable.php          # Single inflatable template
+├── single-evento.php             # Single event template
+├── single.php                    # Single post template
+├── page-catalogo.php             # Catalog page template
+├── page-eventos.php              # Events page template
+├── page.php                      # Generic page template
+├── archive.php                   # Archive template
+├── search.php                    # Search results template
+├── 404.php                       # Error page template
+├── index.php                     # Fallback template
+│
+├── Core Files (Root)
+├── header.php                    # Site header
+├── header_copia.php              # Header backup/variant
+├── footer.php                    # Site footer
+├── sidebar.php                   # Sidebar widget area
+├── comments.php                  # Comments section
+├── functions.php                 # Theme configuration (236 lines)
+│
+├── Styles (Root)
+├── style.css                     # Main stylesheet (42KB)
+├── style-rtl.css                 # RTL language support (16KB)
+│
+├── Configuration Files
+├── composer.json                 # PHP dependencies
+├── package.json                  # Node.js dependencies
+├── phpcs.xml.dist                # PHP CodeSniffer config
+├── screenshot.png                # Theme screenshot
+├── readme.txt                    # WordPress.org readme
+├── README.md                     # Development readme
+└── LICENSE                       # GPL v2 license
+```
+
+## Root-Level Template Files
+
+### Front Page & Homepage
+
+<Accordion title="front-page.php">
+**Purpose**: Custom homepage layout for Zalbi
+
+**Priority**: Takes precedence over `home.php` and `index.php` for the front page
+
+**Features**:
+- Custom hero section
+- Featured content areas
+- Business-specific homepage layout
+
+**When Used**: Automatically loaded when set as the front page in Settings → Reading
+</Accordion>
+
+### Custom Post Type Templates
+
+<Accordion title="single-hinchable.php">
+**Purpose**: Display individual inflatable rental items
+
+**Custom Fields (ACF)**:
+- `medidas` - Dimensions/measurements
+- `capacidad` - Capacity (number of people)
+- `etiqueta_color` - Color-coded category tag
+
+**Features**:
+- Bilingual content (Spanish/Euskera)
+- Custom breadcrumb navigation
+- Category-based color coding:
+  - Orange: Sports / Kirola
+  - Pink: Inflatable / Puzgarria
+  - Blue: Aquatic / Uretakoa
+  - Green: Event / Ekitaldia
+  - Purple: Game / Jokoa
+
+**Translation Arrays**:
+```php
+// Euskera color translations
+$nombres_visuales = array(
+    'tag-orange' => 'Kirola',
+    'tag-pink'   => 'Puzgarria',
+    'tag-blue'   => 'Uretakoa',
+    'tag-green'  => 'Ekitaldia',
+    'tag-purple' => 'Jokoa'
+);
+```
+
+**Location**: `single-hinchable.php:1`
+</Accordion>
+
+<Accordion title="single-evento.php">
+**Purpose**: Display individual event pages
+
+**Features**:
+- Event-specific layout
+- Custom styling for event content
+- Integration with evento custom post type
+
+**Post Type**: `evento` (registered in `functions.php:171`)
+
+**URL Structure**: `/eventos/event-name/`
+</Accordion>
+
+### Page Templates
+
+<Accordion title="page-catalogo.php">
+**Purpose**: Display filterable catalog of inflatables
+
+**Template Name**: "Plantilla Catalogo"
+
+**Key Features**:
+- Category filtering interface
+- Custom taxonomy query (`tipo_hinchable`)
+- Bilingual UI elements
+- Custom category ordering
+
+**Category Order**:
+1. Hinchables/Puzgarriak (Inflatables)
+2. Acuáticos/Uretakoak (Aquatic items)
+3. Deportivos/Kirol atrakzioak (Sports attractions)
+4. Juegos/Jokoak (Games)
+
+**Implementation**:
+```php
+$orden_personalizado = array(
+    'hinchable', 'hinchables', 'puzgarria', 'puzgarriak',
+    'acuatico', 'acuaticos', 'uretakoa', 'uretakoak',
+    'atracciones-deportivas', 'deportivos', 'kirola',
+    'juegos', 'juego', 'jokoak', 'jokoa'
+);
+```
+
+**Location**: `page-catalogo.php:1`
+</Accordion>
+
+<Accordion title="page-eventos.php">
+**Purpose**: Display events archive/listing
+
+**Features**:
+- Events grid or list layout
+- Event filtering capabilities
+- Integration with evento post type
+
+**Assignment**: Applied to pages via template selection or slug matching
+</Accordion>
+
+<Accordion title="page.php">
+**Purpose**: Default template for standard pages
+
+**Features**:
+- Clean page layout
+- Loads `template-parts/content-page.php`
+- Supports comments if enabled
+
+**Usage**: Fallback for any page without a specific template
+</Accordion>
+
+### Blog & Content Templates
+
+<Accordion title="single.php">
+**Purpose**: Display single blog posts
+
+**Features**:
+- Post metadata (date, author, categories)
+- Featured image display
+- Comments section
+- Post navigation
+
+**Usage**: Standard WordPress blog posts
+</Accordion>
+
+<Accordion title="archive.php">
+**Purpose**: Display category, tag, and date archives
+
+**Features**:
+- Archive title and description
+- Post loop with `template-parts/content.php`
+- Pagination
+
+**Usage**: All archive pages (categories, tags, dates, authors)
+</Accordion>
+
+<Accordion title="search.php">
+**Purpose**: Display search results
+
+**Features**:
+- Search query display
+- Results count
+- Loads `template-parts/content-search.php`
+- "No results" handling with `template-parts/content-none.php`
+
+**Usage**: Activated when users submit search queries
+</Accordion>
+
+<Accordion title="404.php">
+**Purpose**: Error page for not found content
+
+**Features**:
+- User-friendly error message
+- Search widget
+- Suggested content
+- Custom styling
+
+**Usage**: Automatically displayed for missing pages/posts
+</Accordion>
+
+<Accordion title="index.php">
+**Purpose**: Ultimate fallback template
+
+**Features**:
+- Generic content loop
+- Works for any content type
+- Simple, reliable layout
+
+**Usage**: Loaded when no more specific template exists
+
+**Importance**: Required by WordPress - theme won't activate without it
+</Accordion>
+
+### Partial Templates
+
+<Accordion title="header.php">
+**Purpose**: Site header section
+
+**Contains**:
+- `<head>` section with `wp_head()`
+- Site logo/branding
+- Primary navigation menu
+- Mobile menu toggle
+
+**Called By**: `get_header()` in all templates
+
+**Location**: `header.php:1`
+</Accordion>
+
+<Accordion title="header_copia.php">
+**Purpose**: Backup or alternative header
+
+**Status**: Legacy file - likely an older version or variant
+
+**Recommendation**: Review and remove if not in use
+</Accordion>
+
+<Accordion title="footer.php">
+**Purpose**: Site footer section
+
+**Contains**:
+- Footer widget areas
+- Legal menu (registered as `menu-legal`)
+- Copyright information
+- WhatsApp floating button (if configured)
+- `wp_footer()` hook
+
+**Called By**: `get_footer()` in all templates
+
+**Special Feature**: WhatsApp button integration with Customizer settings
+
+**Location**: `footer.php:1`
+</Accordion>
+
+<Accordion title="sidebar.php">
+**Purpose**: Sidebar widget area
+
+**Contains**:
+- Dynamic sidebar (`sidebar-1`)
+- Widget display logic
+
+**Called By**: `get_sidebar()` in applicable templates
+
+**Widget Area**: Registered in `functions.php:103`
+</Accordion>
+
+<Accordion title="comments.php">
+**Purpose**: Comments section template
+
+**Features**:
+- Comment list display
+- Comment form
+- Password-protected post handling
+- No comments state
+
+**Called By**: `comments_template()` in single posts/pages
+</Accordion>
+
+## Core Configuration Files
+
+### Theme Functions
+
+<Accordion title="functions.php (236 lines)">
+**Purpose**: Main theme configuration and setup
+
+**Key Functions**:
+
+#### Theme Setup (Lines 18-90)
+```php
+function zalbi_setup()
+```
+- Loads text domain: `zalbi`
+- Registers navigation menus:
+  - `menu-1` (Primary)
+  - `menu-legal` (Legal Footer)
+- Adds theme supports:
+  - `title-tag`
+  - `post-thumbnails`
+  - `html5`
+  - `custom-background`
+  - `custom-logo`
+
+#### Widget Registration (Lines 103-116)
+```php
+function zalbi_widgets_init()
+```
+- Registers sidebar: `sidebar-1`
+
+#### Scripts & Styles (Lines 121-135)
+```php
+function zalbi_scripts()
+```
+- Enqueues:
+  - `style.css` (theme styles)
+  - `navigation.js` (mobile menu)
+  - Font Awesome 6.4.0
+  - Google Fonts (Nunito, Open Sans)
+
+#### Custom Post Type: Hinchable (Lines 138-150)
+```php
+function zalbi_register_hinchables()
+```
+- Post type: `hinchable`
+- Slug: `catalogo`
+- Supports: title, editor, thumbnail, excerpt
+- Icon: `dashicons-smiley`
+
+#### Custom Taxonomy (Lines 153-168)
+```php
+function zalbi_register_taxonomies()
+```
+- Taxonomy: `tipo_hinchable`
+- Applied to: `hinchable`
+- Hierarchical: yes
+- Slug: `tipo`
+
+#### Custom Post Type: Evento (Lines 171-183)
+```php
+function zalbi_register_eventos()
+```
+- Post type: `evento`
+- Slug: `eventos`
+- Supports: title, editor, thumbnail, excerpt
+- Icon: `dashicons-calendar-alt`
+
+#### WhatsApp Customizer (Lines 186-208)
+```php
+function zalbi_customize_whatsapp($wp_customize)
+```
+- Setting: `zalbi_whatsapp_number`
+- Section: "Botón WhatsApp"
+- Field type: text
+- Description: Phone number with country code
+
+#### Include Files (Lines 213-235)
+- `inc/custom-header.php`
+- `inc/template-tags.php`
+- `inc/template-functions.php`
+- `inc/customizer.php`
+- `inc/jetpack.php` (conditional)
+
+**Location**: `functions.php:1`
+</Accordion>
+
+## Include Directory (`inc/`)
+
+<Accordion title="inc/template-tags.php (4,770 bytes)">
+**Purpose**: Custom template tags for displaying post metadata
+
+**Functions**:
+
+#### zalbi_posted_on()
+- Displays post publication date
+- Shows updated date if different
+- HTML5 time element
+- Linked to post permalink
+
+#### zalbi_posted_by()
+- Displays post author
+- Links to author archive
+- Microformat support (vcard)
+
+#### zalbi_entry_footer()
+- Shows categories and tags
+- Edit post link for logged-in users
+- Conditional display logic
+
+**Usage**: Called directly in template files
+
+**Location**: `inc/template-tags.php:1`
+</Accordion>
+
+<Accordion title="inc/template-functions.php (913 bytes)">
+**Purpose**: Helper functions that enhance theme functionality
+
+**Functions**:
+
+#### zalbi_body_classes($classes)
+- Modifies body CSS classes
+- Adds contextual classes
+- Enhances styling capabilities
+
+#### zalbi_pingback_header()
+- Adds pingback URL to header
+- Supports WordPress pingback feature
+
+**Hooks**:
+- `body_class` filter
+- `wp_head` action
+
+**Location**: `inc/template-functions.php:1`
+</Accordion>
+
+<Accordion title="inc/customizer.php (1,718 bytes)">
+**Purpose**: WordPress Customizer integration
+
+**Features**:
+- Live preview support
+- Custom theme options
+- Sanitization callbacks
+- Transport methods
+
+**Integration**: Works with `js/customizer.js` for live updates
+
+**Hook**: `customize_register`
+
+**Location**: `inc/customizer.php:1`
+</Accordion>
+
+<Accordion title="inc/custom-header.php (1,880 bytes)">
+**Purpose**: Custom header image implementation
+
+**Features**:
+- Header image support
+- Header text color customization
+- Responsive header images
+- Default header configuration
+
+**WordPress Feature**: `custom-header`
+
+**Location**: `inc/custom-header.php:1`
+</Accordion>
+
+<Accordion title="inc/jetpack.php (1,546 bytes)">
+**Purpose**: Jetpack plugin compatibility
+
+**Features**:
+- Infinite scroll support
+- Social sharing configuration
+- Content options integration
+
+**Loading**: Conditional - only if Jetpack is active
+
+**Check**: `defined( 'JETPACK__VERSION' )`
+
+**Location**: `inc/jetpack.php:1`
+</Accordion>
+
+## Template Parts Directory (`template-parts/`)
+
+<Accordion title="template-parts/content.php (1,423 bytes)">
+**Purpose**: Default post content display in loops
+
+**Contains**:
+- Post title
+- Post metadata (via template tags)
+- Post excerpt or content
+- Featured image
+- Read more link
+
+**Used In**: 
+- `archive.php`
+- `index.php`
+- Search results
+
+**Called By**: `get_template_part( 'template-parts/content', get_post_type() )`
+</Accordion>
+
+<Accordion title="template-parts/content-page.php (1,206 bytes)">
+**Purpose**: Page content layout
+
+**Contains**:
+- Page title
+- Page content (`the_content()`)
+- Comments template call
+- Edit link
+
+**Used In**: `page.php`
+
+**Called By**: `get_template_part( 'template-parts/content', 'page' )`
+</Accordion>
+
+<Accordion title="template-parts/content-search.php (883 bytes)">
+**Purpose**: Search result item formatting
+
+**Contains**:
+- Post title linked to permalink
+- Post excerpt
+- Post metadata (lighter than default)
+
+**Used In**: `search.php`
+
+**Called By**: `get_template_part( 'template-parts/content', 'search' )`
+</Accordion>
+
+<Accordion title="template-parts/content-none.php (1,256 bytes)">
+**Purpose**: No results found message
+
+**Variations**:
+- Search: "Nothing found" + search form
+- Archive: "Nothing found" + suggestions
+- 404: Handled in `404.php` instead
+
+**Used In**:
+- `archive.php`
+- `search.php`
+
+**Called By**: `get_template_part( 'template-parts/content', 'none' )`
+</Accordion>
+
+## JavaScript Directory (`js/`)
+
+<Accordion title="js/navigation.js (1,850 bytes)">
+**Purpose**: Mobile menu and keyboard navigation
+
+**Features**:
+- Toggle button functionality
+- Mobile menu open/close
+- Keyboard navigation support
+- Accessibility enhancements
+- Touch-friendly interactions
+
+**Enqueued In**: `functions.php:125`
+
+**Dependencies**: None (vanilla JavaScript)
+
+**Handle**: `zalbi-navigation`
+</Accordion>
+
+<Accordion title="js/customizer.js (1,011 bytes)">
+**Purpose**: Live preview in WordPress Customizer
+
+**Features**:
+- Real-time site title updates
+- Bloginfo live preview
+- Background color updates
+- Text color changes
+
+**Context**: Only loads in Customizer preview
+
+**Works With**: `inc/customizer.php`
+</Accordion>
+
+<Accordion title="js/navigation copy 1.js (2,980 bytes)">
+**Purpose**: Legacy/backup file
+
+**Status**: Duplicate file - appears to be backup
+
+**Recommendation**: Review and remove if unused
+</Accordion>
+
+## Assets Directories
+
+### Images (`img/`)
+
+<Accordion title="img/logo.webp (994KB)">
+**Purpose**: Zalbi theme logo
+
+**Format**: WebP (modern, optimized)
+
+**Size**: 994KB (large file - consider optimization)
+
+**Usage**: Displayed in header, likely via custom logo feature
+
+**Recommendation**: Optimize or create multiple sizes for responsive display
+</Accordion>
+
+### Translations (`languages/`)
+
+<Accordion title="languages/zalbi.pot (4,632 bytes)">
+**Purpose**: Translation template (Portable Object Template)
+
+**Contains**:
+- All translatable strings from theme
+- Context for translators
+- String references (file:line)
+
+**Usage**: Base file for creating translations
+
+**Text Domain**: `zalbi`
+
+**Languages Supported**: Spanish (default), Euskera (via Polylang)
+</Accordion>
+
+<Accordion title="languages/readme.txt (322 bytes)">
+**Purpose**: Translation instructions
+
+**Contains**:
+- How to translate the theme
+- POT file usage
+- Translation workflow
+</Accordion>
+
+## Stylesheets
+
+<Accordion title="style.css (42,100 bytes)">
+**Purpose**: Main theme stylesheet
+
+**Header Information**:
+- Theme Name: zalbi-theme
+- Version: 1.0.0
+- Author: Yeray Garrido
+- Text Domain: zalbi
+- Based on: Underscores (_s)
+
+**Structure** (from Table of Contents):
+1. Generic (Normalize, Box sizing)
+2. Base (Typography, Elements, Links, Forms)
+3. Layouts
+4. Components (Navigation, Posts, Comments, Widgets, Media)
+5. Plugins (Jetpack)
+6. Utilities (Accessibility, Alignments)
+
+**Size**: 42KB (well-organized, moderate size)
+
+**RTL Support**: Yes (`style-rtl.css`)
+</Accordion>
+
+<Accordion title="style-rtl.css (16,934 bytes)">
+**Purpose**: Right-to-left language support
+
+**Languages**: Arabic, Hebrew, Persian, etc.
+
+**Contents**: Mirrored layouts and reversed directional styles
+
+**Auto-generated**: Via build tools
+
+**Size**: 16KB
+</Accordion>
+
+## Configuration Files
+
+<Accordion title="composer.json">
+**Purpose**: PHP dependency management
+
+**Dependencies**: (Check file for specifics)
+- PHP CodeSniffer
+- WordPress Coding Standards
+
+**Scripts**:
+- `lint:wpcs` - Code style checking
+- `lint:php` - PHP syntax validation
+- `make-pot` - Generate translation file
+</Accordion>
+
+<Accordion title="package.json">
+**Purpose**: Node.js dependency management
+
+**Scripts**:
+- `compile:css` - SASS to CSS compilation
+- `compile:rtl` - RTL stylesheet generation
+- `watch` - Watch and recompile SASS
+- `lint:scss` - SCSS linting
+- `lint:js` - JavaScript linting
+- `bundle` - Create distribution ZIP
+
+**Dev Dependencies**: Build tools and linters
+</Accordion>
+
+<Accordion title="phpcs.xml.dist">
+**Purpose**: PHP CodeSniffer configuration
+
+**Standards**: WordPress Coding Standards
+
+**Rules**: PHP compatibility, best practices
+
+**Ignored**: `vendor/`, `node_modules/`
+</Accordion>
+
+## Documentation & Meta Files
+
+<Accordion title="README.md">
+**Purpose**: Development documentation
+
+**Contents**:
+- Installation instructions
+- Development setup
+- CLI commands
+- Underscores framework info
+- Theme customization guide
+
+**Audience**: Developers working on the theme
+</Accordion>
+
+<Accordion title="readme.txt">
+**Purpose**: WordPress.org theme readme
+
+**Contents**:
+- Theme description
+- Installation instructions
+- Changelog
+- Credits
+
+**Format**: WordPress-specific markdown
+
+**Audience**: End users installing the theme
+</Accordion>
+
+<Accordion title="LICENSE (18,046 bytes)">
+**Purpose**: Software license
+
+**License**: GNU General Public License v2 or later
+
+**Size**: 18KB (full GPL text)
+
+**Compatibility**: WordPress license requirement
+</Accordion>
+
+<Accordion title="screenshot.png (264 bytes)">
+**Purpose**: Theme preview screenshot
+
+**Size**: 264 bytes (very small - likely placeholder)
+
+**Recommendation**: Replace with actual theme screenshot (1200x900px recommended)
+
+**Usage**: Displayed in WordPress Appearance → Themes
+</Accordion>
+
+## Legacy Directory (`_zalbi/`)
+
+<Info>
+The `_zalbi/` directory contains a complete backup of the theme files from a previous version.
+</Info>
+
+**Purpose**: Backup/archive of earlier theme iteration
+
+**Contents**: Mirror of all theme files
+
+**Recommendation**: 
+- Keep for version history if needed
+- Remove from production to reduce file size
+- Consider using version control (Git) instead
+
+**Impact**: Doubles theme file count and size
+
+## File Count Summary
+
+<CardGroup cols={2}>
+  <Card title="Template Files" icon="file-code">
+    19 PHP template files in root directory
+  </Card>
+  
+  <Card title="Include Files" icon="folder">
+    5 files in `inc/` directory
+  </Card>
+  
+  <Card title="Template Parts" icon="puzzle-piece">
+    4 files in `template-parts/` directory
+  </Card>
+  
+  <Card title="JavaScript" icon="js">
+    3 files in `js/` directory
+  </Card>
+  
+  <Card title="Assets" icon="image">
+    1 logo + 2 translation files
+  </Card>
+  
+  <Card title="Configuration" icon="gear">
+    6 config files (composer, package, phpcs, etc.)
+  </Card>
+</CardGroup>
+
+## File Naming Conventions
+
+<Note>
+Zalbi Theme follows WordPress theme development standards for file naming:
+</Note>
+
+### Template Files
+- Lowercase with hyphens: `single-evento.php`
+- Descriptive names: `page-catalogo.php`
+- WordPress hierarchy: `404.php`, `archive.php`
+
+### Include Files
+- Descriptive purpose: `template-tags.php`
+- Hyphenated words: `custom-header.php`
+- Organized in `inc/` directory
+
+### JavaScript Files
+- Lowercase, descriptive: `navigation.js`
+- Purpose-based naming: `customizer.js`
+
+### Styles
+- Main file: `style.css` (required)
+- Variants: `style-rtl.css`
+
+## Maintenance Recommendations
+
+<CardGroup cols={2}>
+  <Card title="Remove Duplicates" icon="trash">
+    Delete backup files:
+    - `header_copia.php`
+    - `js/navigation copy 1.js`
+    - `_zalbi/` directory (if version controlled)
+  </Card>
+  
+  <Card title="Optimize Assets" icon="gauge-high">
+    Compress and optimize:
+    - `img/logo.webp` (994KB → consider 100-200KB)
+    - Generate responsive image sizes
+  </Card>
+  
+  <Card title="Update Screenshot" icon="camera">
+    Replace `screenshot.png`:
+    - Current: 264 bytes (too small)
+    - Recommended: 1200x900px
+    - Show actual theme design
+  </Card>
+  
+  <Card title="Version Control" icon="git">
+    Use Git instead of file copies:
+    - Remove `_zalbi/` backup directory
+    - Commit regularly
+    - Tag releases
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Theme Overview" icon="home" href="./overview">
+    High-level architecture and design
+  </Card>
+  
+  <Card title="Template Hierarchy" icon="sitemap" href="./template-hierarchy">
+    How WordPress selects templates
+  </Card>
+</CardGroup>

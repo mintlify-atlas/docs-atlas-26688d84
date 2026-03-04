@@ -1,0 +1,233 @@
+---
+title: "Eventos Post Type"
+description: "Custom post type for managing events and party services in the Zalbi Theme"
+---
+
+The **Eventos** (Events) custom post type is designed for showcasing event services, party packages, or completed event portfolios. It complements the hinchables catalog by focusing on complete event solutions.
+
+## Registration
+
+The eventos post type is registered in `functions.php` using the `zalbi_register_eventos()` function:
+
+```php functions.php (lines 170-183)
+// Registrar el Post Type "Evento" (Usando el slug "eventos")
+// (codigo mas sencillo da que englobamos todos los eventos juntos)
+function zalbi_register_eventos() {
+    $args = array(
+        'labels' => array( 'name' => 'Eventos', 'singular_name' => 'Evento' ),
+        'public' => true,
+        'has_archive' => false,
+        'menu_icon' => 'dashicons-calendar-alt', 
+        'supports' => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        // SLUG GENÉRICO PARA SEO Y POLYLANG
+        'rewrite' => array( 'slug' => 'eventos' ), 
+    );
+    register_post_type( 'evento', $args );
+}
+add_action( 'init', 'zalbi_register_eventos' );
+```
+
+## Configuration Parameters
+
+<ParamField path="labels" type="array">
+  Display labels for the post type in the WordPress admin
+  - **name**: "Eventos" (plural)
+  - **singular_name**: "Evento" (singular)
+</ParamField>
+
+<ParamField path="public" type="boolean" default="true">
+  Makes the post type publicly accessible on the frontend and in the admin
+</ParamField>
+
+<ParamField path="has_archive" type="boolean" default="false">
+  Disables the archive page. Events are displayed via custom templates or page layouts
+</ParamField>
+
+<ParamField path="menu_icon" type="string" default="dashicons-calendar-alt">
+  The calendar Dashicon displayed in the WordPress admin menu
+</ParamField>
+
+<ParamField path="supports" type="array">
+  Features supported by the post type:
+  - `title` - Event name/title
+  - `editor` - Visual editor for full description
+  - `thumbnail` - Featured image support
+  - `excerpt` - Short summary for listings
+</ParamField>
+
+<ParamField path="rewrite.slug" type="string" default="eventos">
+  URL slug for individual events. URLs will be structured as `/eventos/event-name/`
+</ParamField>
+
+## Use Cases
+
+The eventos post type can be used for:
+
+- **Event Packages**: Pre-configured party packages (e.g., "Cumpleaños Premium", "Comunión Completa")
+- **Portfolio**: Showcase completed events with photos and descriptions
+- **Seasonal Events**: Special holiday or seasonal offerings
+- **Service Descriptions**: Detailed event planning services
+
+## Creating an Event
+
+<Steps>
+  <Step title="Navigate to Eventos">
+    In the WordPress admin, go to **Eventos** > **Add New**
+  </Step>
+  
+  <Step title="Add Event Details">
+    - **Title**: Name of the event or package (e.g., "Cumpleaños Infantil Premium")
+    - **Content**: Complete description including:
+      - What's included in the package
+      - Duration and pricing information
+      - Target age group or event type
+      - Setup and teardown details
+    - **Excerpt**: Brief summary for event listings
+  </Step>
+  
+  <Step title="Set Featured Image">
+    Upload an eye-catching image that represents the event:
+    - Event setup photos
+    - Happy customers/kids enjoying the event
+    - Complete event package visualization
+  </Step>
+  
+  <Step title="Publish">
+    Click **Publish** to make the event live at `/eventos/your-event-name/`
+  </Step>
+</Steps>
+
+## URL Structure
+
+<Note>
+  The `eventos` slug is generic to support multilingual SEO with Polylang.
+</Note>
+
+Individual events are accessible at:
+
+```
+https://yoursite.com/eventos/event-name/
+```
+
+For example:
+- `/eventos/cumpleanos-premium/`
+- `/eventos/comunion-completa/`
+- `/eventos/fiesta-piscina/`
+
+## Simplified Design
+
+As noted in the code comments, the eventos implementation is intentionally simple ("codigo mas sencillo da que englobamos todos los eventos juntos"):
+
+- **No taxonomies**: All events are grouped together without categorization
+- **No custom fields**: Uses standard WordPress fields only
+- **Flexible content**: The editor allows complete freedom in structuring event information
+
+<Note>
+  If you need to categorize events (e.g., by event type, season, or age group), you can add a custom taxonomy similar to `tipo_hinchable`. See [Taxonomies](/post-types/taxonomies) for examples.
+</Note>
+
+## Template Hierarchy
+
+WordPress will look for templates in this order:
+
+1. `single-evento.php` - Specific template for events
+2. `single.php` - Generic single post template
+3. `singular.php` - Fallback singular template
+4. `index.php` - Ultimate fallback
+
+## Querying Eventos
+
+### Get All Events
+
+```php
+$args = array(
+    'post_type' => 'evento',
+    'posts_per_page' => -1,
+    'orderby' => 'title',
+    'order' => 'ASC'
+);
+$eventos = new WP_Query( $args );
+
+if ( $eventos->have_posts() ) {
+    while ( $eventos->have_posts() ) {
+        $eventos->the_post();
+        // Display event
+    }
+    wp_reset_postdata();
+}
+```
+
+### Recent Events
+
+```php
+$args = array(
+    'post_type' => 'evento',
+    'posts_per_page' => 3,
+    'orderby' => 'date',
+    'order' => 'DESC'
+);
+$recent_eventos = new WP_Query( $args );
+```
+
+### Display Event Card
+
+```php
+<div class="evento-card">
+    <?php if ( has_post_thumbnail() ) : ?>
+        <div class="evento-image">
+            <?php the_post_thumbnail( 'medium' ); ?>
+        </div>
+    <?php endif; ?>
+    
+    <h3><?php the_title(); ?></h3>
+    
+    <div class="evento-excerpt">
+        <?php the_excerpt(); ?>
+    </div>
+    
+    <a href="<?php the_permalink(); ?>" class="btn-ver-evento">
+        Ver Detalles
+    </a>
+</div>
+```
+
+## Admin Menu Location
+
+The Eventos post type appears in the WordPress admin sidebar with:
+- Icon: Calendar (dashicons-calendar-alt)
+- Position: Below Hinchables
+- Submenu items:
+  - All Eventos
+  - Add New
+
+## Integration with Polylang
+
+The generic `eventos` slug supports multilingual URLs:
+
+- **Spanish**: `/eventos/cumpleanos-premium/`
+- **English**: `/events/premium-birthday/`
+- **French**: `/evenements/anniversaire-premium/`
+
+Ensure Polylang is configured to translate the `evento` post type in **Settings** > **Polylang** > **Post Types**.
+
+## Combining with Hinchables
+
+Events can reference specific hinchables in the content:
+
+```php
+// In single-evento.php template
+<h3>Hinchables Recomendados</h3>
+<?php
+$recommended_hinchables = array( 123, 456, 789 ); // Post IDs
+$args = array(
+    'post_type' => 'hinchable',
+    'post__in' => $recommended_hinchables
+);
+$query = new WP_Query( $args );
+// Display hinchables
+?>
+```
+
+<Note>
+  For more advanced event-hinchable relationships, consider using Advanced Custom Fields (ACF) with a relationship field.
+</Note>

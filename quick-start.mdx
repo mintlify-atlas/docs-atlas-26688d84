@@ -1,0 +1,362 @@
+---
+title: "Quick Start"
+description: "Get started with Zalbi Theme - Configure settings and create your first content"
+---
+
+## Overview
+
+This guide will walk you through the initial setup and configuration of Zalbi Theme, including creating your first inflatable (hinchable) and event.
+
+<Info>
+  Before starting, ensure you've completed the [installation](/installation) and have ACF and Polylang plugins activated.
+</Info>
+
+## Initial Theme Setup
+
+<Steps>
+  <Step title="Configure Site Identity">
+    Set up your basic site information:
+    
+    1. Navigate to **Appearance > Customize**
+    2. Go to **Site Identity**
+    3. Set your **Site Title** and **Tagline**
+    4. Upload a **Site Logo** (recommended: 250x250px)
+    
+    ```php
+    // The theme supports custom logo with these dimensions:
+    'custom-logo' => array(
+        'height'      => 250,
+        'width'       => 250,
+        'flex-width'  => true,
+        'flex-height' => true,
+    )
+    ```
+  </Step>
+  
+  <Step title="Set Up Menus">
+    The theme supports two menu locations:
+    
+    1. Go to **Appearance > Menus**
+    2. Create a new menu for **Primary** (main navigation)
+    3. Create another menu for **Menú Legal Footer** (footer legal links)
+    4. Assign pages to each menu
+    5. Set the menu locations
+    
+    <Accordion title="Menu locations in code">
+      ```php
+      register_nav_menus(
+          array(
+              'menu-1'     => esc_html__( 'Primary', 'zalbi' ),
+              'menu-legal' => esc_html__( 'Menú Legal Footer', 'zalbi' ),
+          )
+      );
+      ```
+    </Accordion>
+  </Step>
+  
+  <Step title="Configure WhatsApp Button">
+    Enable the floating WhatsApp contact button:
+    
+    1. In **Appearance > Customize**
+    2. Find **Botón WhatsApp** section
+    3. Enter your phone number with country code (e.g., `34658887358`)
+    4. Leave empty to hide the button
+    
+    <Note>
+      The WhatsApp button appears as a floating element on the frontend, allowing visitors to contact you directly.
+    </Note>
+  </Step>
+  
+  <Step title="Configure Polylang Languages">
+    Set up bilingual content:
+    
+    1. Go to **Languages** settings
+    2. Ensure Spanish and Basque are added
+    3. For each menu, create language-specific versions
+    4. Set language-specific URLs (e.g., `/catalogo` for Spanish, `/katalogoa` for Basque)
+  </Step>
+</Steps>
+
+## Create Your First Hinchable (Inflatable)
+
+<Steps>
+  <Step title="Navigate to Hinchables">
+    1. In WordPress admin, find **Hinchables** in the sidebar
+    2. Click **Add New**
+    
+    <Info>
+      The custom post type uses the slug `catalogo` for SEO and multilingual compatibility.
+    </Info>
+  </Step>
+  
+  <Step title="Add Basic Information">
+    Fill in the essential details:
+    
+    - **Title**: Name of the inflatable (e.g., "Castillo Medieval")
+    - **Content**: Detailed description of the inflatable
+    - **Featured Image**: Main product photo (recommended: high-quality image)
+    - **Excerpt**: Short summary for catalog listings
+  </Step>
+  
+  <Step title="Configure Custom Fields (ACF)">
+    Scroll down to find the custom fields:
+    
+    **Medidas (Dimensions)**
+    ```text
+    Example: 4m x 3m x 2.5m
+    ```
+    
+    **Capacidad (Capacity)**
+    ```text
+    Example: 8-10 niños
+    ```
+    
+    **Etiqueta Color (Category Tag)**
+    
+    Select the appropriate category:
+    - `tag-orange` - Atracción deportiva / Kirola
+    - `tag-pink` - Hinchable / Puzgarria
+    - `tag-blue` - Acuático / Uretakoa
+    - `tag-green` - Evento / Ekitaldia
+    - `tag-purple` - Juego / Jokoa
+    
+    <Warning>
+      The color tag affects both the visual appearance and category filtering on the catalog page.
+    </Warning>
+  </Step>
+  
+  <Step title="Assign Taxonomy">
+    1. On the right sidebar, find **Tipos de Hinchable**
+    2. Check the appropriate category
+    3. This enables filtering on the catalog page
+    
+    ```php
+    // Custom taxonomy registration:
+    register_taxonomy( 'tipo_hinchable', 'hinchable', array(
+        'hierarchical' => true,
+        'public'       => true,
+        'show_in_rest' => true,
+    ) );
+    ```
+  </Step>
+  
+  <Step title="Publish and Translate">
+    1. Click **Publish**
+    2. In the Polylang language box, create translations:
+       - Click **+** next to Euskara to create Basque version
+       - Fill in translated content
+       - Save both versions
+  </Step>
+</Steps>
+
+## Create Your First Event
+
+<Steps>
+  <Step title="Add New Event">
+    1. Go to **Eventos** in the WordPress admin
+    2. Click **Add New**
+    
+    <Info>
+      Events use the slug `eventos` and are designed for service-based offerings.
+    </Info>
+  </Step>
+  
+  <Step title="Enter Event Details">
+    Add the following information:
+    
+    - **Title**: Event name (e.g., "Fiesta de Cumpleaños Completa")
+    - **Content**: Full event description
+    - **Featured Image**: Event photo or promotional image
+  </Step>
+  
+  <Step title="Configure Event Fields (ACF)">
+    Fill in the event-specific custom fields:
+    
+    **Etiqueta Texto (Category Label)**
+    ```text
+    Example: Cumpleaños / Urtebetetzeak
+    ```
+    
+    **Etiqueta Color (Category Color)**
+    ```text
+    Example: tag-green
+    ```
+    
+    **Duración (Duration)**
+    ```text
+    Example: 3-4 horas
+    ```
+    
+    **Público (Target Audience)**
+    ```text
+    Example: Niños de 5-12 años
+    ```
+  </Step>
+  
+  <Step title="Publish the Event">
+    1. Click **Publish**
+    2. Create translations in Polylang if needed
+    3. View the event on the frontend
+  </Step>
+</Steps>
+
+## Create Essential Pages
+
+### Catalog Page
+
+<Steps>
+  <Step title="Create Catalog Page">
+    1. Go to **Pages > Add New**
+    2. Title: "Catálogo" (Spanish) / "Katalogoa" (Basque)
+    3. Select template: **Plantilla Catalogo**
+    4. Publish
+  </Step>
+  
+  <Step title="How the Catalog Works">
+    The catalog template automatically:
+    
+    - Displays all hinchables
+    - Provides category filtering buttons
+    - Orders items by custom taxonomy
+    - Adapts content based on current language
+    
+    <Accordion title="View the catalog template code">
+      ```php
+      // Detect language
+      $es_euskera = (function_exists('pll_current_language') 
+          && pll_current_language() == 'eu');
+      
+      // Get taxonomy terms
+      $terms = get_terms( array(
+          'taxonomy' => 'tipo_hinchable',
+          'hide_empty' => true,
+      ) );
+      ```
+    </Accordion>
+  </Step>
+</Steps>
+
+### Events Page
+
+<Steps>
+  <Step title="Create Events Page">
+    1. Go to **Pages > Add New**
+    2. Title: "Eventos" (Spanish) / "Ekitaldiak" (Basque)
+    3. Content: Brief introduction to your event services
+    4. Publish
+  </Step>
+</Steps>
+
+### Contact Page
+
+<Steps>
+  <Step title="Create Contact Page">
+    Create a contact page for inquiry forms:
+    
+    1. **Pages > Add New**
+    2. Title: "Contacto" / "Kontaktua"
+    3. Add contact form (using Contact Form 7 or similar)
+    4. This page is linked from hinchable and event detail pages
+  </Step>
+</Steps>
+
+## Configure Permalinks
+
+<Warning>
+  After creating custom post types, you must flush permalink rules.
+</Warning>
+
+1. Go to **Settings > Permalinks**
+2. Ensure **Post name** structure is selected
+3. Click **Save Changes**
+4. Verify URLs work correctly:
+   - Spanish: `/catalogo/hinchable-name`
+   - Basque: `/katalogoa/hinchable-name`
+   - Events: `/eventos/event-name` or `/ekitaldiak/event-name`
+
+## Testing Your Setup
+
+<AccordionGroup>
+  <Accordion title="Test Hinchable Display">
+    1. Navigate to your catalog page
+    2. Verify hinchables appear correctly
+    3. Test category filtering
+    4. Click on a hinchable to view single page
+    5. Check custom fields display properly
+    6. Verify "Related Products" section shows 3 random items
+  </Accordion>
+  
+  <Accordion title="Test Events Display">
+    1. Visit the events page
+    2. Click on an event
+    3. Verify event details (duration, audience) display
+    4. Test the "Request Quote" button links to contact page
+  </Accordion>
+  
+  <Accordion title="Test Language Switching">
+    1. Use Polylang language switcher
+    2. Verify content translates correctly
+    3. Check that URLs change appropriately
+    4. Confirm menus display in correct language
+    5. Test UI elements translate (buttons, labels, breadcrumbs)
+  </Accordion>
+  
+  <Accordion title="Test WhatsApp Button">
+    1. Visit the site frontend
+    2. Look for floating WhatsApp button
+    3. Click to verify correct number
+    4. Test on mobile devices
+  </Accordion>
+</AccordionGroup>
+
+## Understanding the Theme Structure
+
+### Custom Post Types
+
+The theme registers two custom post types in `functions.php`:
+
+```php functions.php:137-150
+// Register Hinchables
+function zalbi_register_hinchables() {
+    $args = array(
+        'labels' => array( 
+            'name' => 'Hinchables', 
+            'singular_name' => 'Hinchable' 
+        ),
+        'public' => true,
+        'has_archive' => false,
+        'menu_icon' => 'dashicons-smiley',
+        'supports' => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        'rewrite' => array( 'slug' => 'catalogo' ),
+    );
+    register_post_type( 'hinchable', $args );
+}
+add_action( 'init', 'zalbi_register_hinchables' );
+```
+
+### Template Files
+
+Key templates to know:
+
+- `single-hinchable.php` - Individual inflatable display
+- `single-evento.php` - Individual event display  
+- `page-catalogo.php` - Catalog template with filtering
+- `page-eventos.php` - Events listing page
+- `front-page.php` - Homepage template
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Theme Structure" icon="folder-tree" href="/structure/overview">
+    Learn about the theme's file organization and template hierarchy
+  </Card>
+  <Card title="Customization" icon="palette" href="/customization/theme-customizer">
+    Explore customization options and theme settings
+  </Card>
+  <Card title="Custom Post Types" icon="database" href="/post-types/hinchables">
+    Deep dive into hinchables and eventos functionality
+  </Card>
+  <Card title="Template Development" icon="code" href="/templates/custom-templates">
+    Create custom templates and extend theme functionality
+  </Card>
+</CardGroup>

@@ -1,0 +1,195 @@
+---
+title: "Hinchables Post Type"
+description: "Custom post type for managing inflatable rentals in the Zalbi Theme catalog"
+---
+
+The **Hinchables** (Inflatables) custom post type is the core content type for managing your rental catalog. Each hinchable represents an individual inflatable item available for rent.
+
+## Registration
+
+The hinchables post type is registered in `functions.php` using the `zalbi_register_hinchables()` function:
+
+```php functions.php (lines 137-150)
+// Registrar el Post Type "Hinchable" (Usando el slug "catalogo")
+function zalbi_register_hinchables() {
+    $args = array(
+        'labels' => array( 'name' => 'Hinchables', 'singular_name' => 'Hinchable' ),
+        'public' => true,
+        'has_archive' => false,
+        'menu_icon' => 'dashicons-smiley',
+        'supports' => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+        // SLUG GENÉRICO PARA SEO Y POLYLANG
+        'rewrite' => array( 'slug' => 'catalogo' ), 
+    );
+    register_post_type( 'hinchable', $args );
+}
+add_action( 'init', 'zalbi_register_hinchables' );
+```
+
+## Configuration Parameters
+
+<ParamField path="labels" type="array">
+  Display labels for the post type in the WordPress admin
+  - **name**: "Hinchables" (plural)
+  - **singular_name**: "Hinchable" (singular)
+</ParamField>
+
+<ParamField path="public" type="boolean" default="true">
+  Makes the post type publicly accessible on the frontend and in the admin
+</ParamField>
+
+<ParamField path="has_archive" type="boolean" default="false">
+  Disables the archive page. Individual inflatables are displayed via custom templates, not an archive listing
+</ParamField>
+
+<ParamField path="menu_icon" type="string" default="dashicons-smiley">
+  The Dashicons icon displayed in the WordPress admin menu
+</ParamField>
+
+<ParamField path="supports" type="array">
+  Features supported by the post type:
+  - `title` - Post title
+  - `editor` - Visual editor for description
+  - `thumbnail` - Featured image support
+  - `excerpt` - Short description/summary
+</ParamField>
+
+<ParamField path="rewrite.slug" type="string" default="catalogo">
+  URL slug for individual hinchables. URLs will be structured as `/catalogo/hinchable-name/`
+</ParamField>
+
+## Creating a Hinchable
+
+<Steps>
+  <Step title="Navigate to Hinchables">
+    In the WordPress admin, go to **Hinchables** > **Add New**
+  </Step>
+  
+  <Step title="Add Basic Information">
+    - **Title**: Name of the inflatable (e.g., "Castillo Medieval Grande")
+    - **Content**: Full description with features, dimensions, capacity
+    - **Excerpt**: Short summary for catalog listings
+  </Step>
+  
+  <Step title="Set Featured Image">
+    Upload a high-quality image in the **Featured Image** section. This will be used:
+    - In catalog grids
+    - On the individual product page
+    - In related product sections
+  </Step>
+  
+  <Step title="Assign Type">
+    Select one or more **Tipos de Hinchable** (types) to categorize the inflatable. See [Taxonomies](/post-types/taxonomies) for details.
+  </Step>
+  
+  <Step title="Publish">
+    Click **Publish** to make the hinchable live at `/catalogo/your-hinchable-name/`
+  </Step>
+</Steps>
+
+## URL Structure
+
+<Note>
+  The `catalogo` slug is intentionally generic for SEO and multilingual support with Polylang.
+</Note>
+
+Individual hinchables are accessible at:
+
+```
+https://yoursite.com/catalogo/hinchable-name/
+```
+
+For example:
+- `/catalogo/castillo-medieval/`
+- `/catalogo/tobogan-acuatico/`
+- `/catalogo/pista-americana/`
+
+## Filtering by Type
+
+Hinchables can be filtered using the `tipo_hinchable` taxonomy. See [Taxonomies](/post-types/taxonomies) for implementation details.
+
+Example taxonomy archive URLs:
+```
+/tipo/castillos/
+/tipo/toboganes/
+/tipo/hinchables-acuaticos/
+```
+
+## Template Hierarchy
+
+WordPress will look for templates in this order:
+
+1. `single-hinchable.php` - Specific template for hinchables
+2. `single.php` - Generic single post template
+3. `singular.php` - Fallback singular template
+4. `index.php` - Ultimate fallback
+
+## Querying Hinchables
+
+### Get All Hinchables
+
+```php
+$args = array(
+    'post_type' => 'hinchable',
+    'posts_per_page' => -1,
+    'orderby' => 'title',
+    'order' => 'ASC'
+);
+$hinchables = new WP_Query( $args );
+
+if ( $hinchables->have_posts() ) {
+    while ( $hinchables->have_posts() ) {
+        $hinchables->the_post();
+        // Display hinchable
+    }
+    wp_reset_postdata();
+}
+```
+
+### Filter by Type
+
+```php
+$args = array(
+    'post_type' => 'hinchable',
+    'tax_query' => array(
+        array(
+            'taxonomy' => 'tipo_hinchable',
+            'field' => 'slug',
+            'terms' => 'castillos'
+        )
+    )
+);
+$castillos = new WP_Query( $args );
+```
+
+### Get Featured Image
+
+```php
+if ( has_post_thumbnail() ) {
+    the_post_thumbnail( 'large', array( 'class' => 'hinchable-image' ) );
+}
+```
+
+## Admin Menu Location
+
+The Hinchables post type appears in the WordPress admin sidebar with:
+- Icon: Smiley face (dashicons-smiley)
+- Position: Below Posts, above Media
+- Submenu items:
+  - All Hinchables
+  - Add New
+  - Tipos de Hinchable (taxonomy)
+
+<Note>
+  The `has_archive` is set to `false`, meaning there's no automatic `/catalogo/` archive page. You'll need to create a custom page template or use a custom query on your homepage/catalog page.
+</Note>
+
+## Integration with Polylang
+
+The generic `catalogo` slug allows Polylang to handle translations:
+
+- **Spanish**: `/catalogo/castillo-medieval/`
+- **English**: `/catalog/medieval-castle/`
+- **French**: `/catalogue/chateau-medieval/`
+
+Ensure Polylang is configured to translate the `hinchable` post type in **Settings** > **Polylang** > **Post Types**.

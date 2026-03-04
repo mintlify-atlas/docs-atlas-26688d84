@@ -1,0 +1,470 @@
+---
+title: 'Filters'
+description: 'WordPress filter hooks available in Zalbi Theme for modifying theme data and behavior'
+icon: 'filter'
+---
+
+Zalbi Theme implements various WordPress filter hooks that allow developers to modify and customize theme data. This page documents all `add_filter` and `apply_filters` calls used throughout the theme.
+
+## Custom Background Filters
+
+### zalbi_custom_background_args
+
+<ParamField path="Filter" type="string" default="zalbi_custom_background_args">
+  Filters custom background arguments
+</ParamField>
+
+<ParamField path="Type" type="string" default="apply_filters">
+  Applied filter (can be hooked into)
+</ParamField>
+
+<ParamField path="Parameters" type="array">
+  Array of custom background arguments
+</ParamField>
+
+<ParamField path="Location" type="string">
+  `functions.php:66`
+</ParamField>
+
+**Purpose:** Allows modification of the custom background feature arguments before they are registered with WordPress. This filter controls the default background color and image.
+
+**Default Values:**
+- `default-color`: `'ffffff'` (white)
+- `default-image`: `''` (empty)
+
+**Source Code:**
+
+```php functions.php
+add_theme_support(
+    'custom-background',
+    apply_filters(
+        'zalbi_custom_background_args',
+        array(
+            'default-color' => 'ffffff',
+            'default-image' => '',
+        )
+    )
+);
+```
+
+**Extension Example:**
+
+```php
+// Change default background color
+function my_custom_background_args( $args ) {
+    $args['default-color'] = 'f5f5f5'; // Light gray background
+    $args['default-image'] = get_stylesheet_directory_uri() . '/images/bg-pattern.png';
+    return $args;
+}
+add_filter( 'zalbi_custom_background_args', 'my_custom_background_args' );
+```
+
+<Note>
+  Changes to this filter affect the default background settings in the WordPress Customizer under "Appearance > Background".
+</Note>
+
+---
+
+## Content Width Filters
+
+### zalbi_content_width
+
+<ParamField path="Filter" type="string" default="zalbi_content_width">
+  Filters the content width in pixels
+</ParamField>
+
+<ParamField path="Type" type="string" default="apply_filters">
+  Applied filter (can be hooked into)
+</ParamField>
+
+<ParamField path="Parameters" type="integer">
+  Content width in pixels (default: 640)
+</ParamField>
+
+<ParamField path="Location" type="string">
+  `functions.php:96`
+</ParamField>
+
+**Purpose:** Allows modification of the global `$content_width` variable, which affects embedded content like videos, images, and oEmbeds. WordPress uses this value to determine the maximum width of embedded media.
+
+**Default Value:** `640` pixels
+
+**Source Code:**
+
+```php functions.php
+function zalbi_content_width() {
+    $GLOBALS['content_width'] = apply_filters( 'zalbi_content_width', 640 );
+}
+add_action( 'after_setup_theme', 'zalbi_content_width', 0 );
+```
+
+**Extension Example:**
+
+```php
+// Increase content width for wide layouts
+function my_content_width( $width ) {
+    // Use different widths based on page type
+    if ( is_page_template( 'template-full-width.php' ) ) {
+        return 1200;
+    }
+    return $width;
+}
+add_filter( 'zalbi_content_width', 'my_content_width' );
+```
+
+<Accordion title="Why Content Width Matters">
+
+The `$content_width` global variable is important for several reasons:
+
+1. **Embedded Media**: WordPress uses this value to set the maximum width for embedded videos, images, and other media from services like YouTube, Vimeo, etc.
+
+2. **Image Scaling**: Helps WordPress determine appropriate image sizes when generating thumbnails.
+
+3. **Responsive Design**: Ensures embedded content doesn't overflow the content area on different screen sizes.
+
+4. **Performance**: Prevents unnecessarily large images from being loaded when smaller sizes would suffice.
+
+</Accordion>
+
+---
+
+## Custom Header Filters
+
+### zalbi_custom_header_args
+
+<ParamField path="Filter" type="string" default="zalbi_custom_header_args">
+  Filters custom header arguments
+</ParamField>
+
+<ParamField path="Type" type="string" default="apply_filters">
+  Applied filter (can be hooked into)
+</ParamField>
+
+<ParamField path="Parameters" type="array">
+  Array of custom header arguments
+</ParamField>
+
+<ParamField path="Location" type="string">
+  `inc/custom-header.php:23`
+</ParamField>
+
+**Purpose:** Allows modification of custom header feature arguments before registration. Controls header image dimensions, text color, and styling callbacks.
+
+**Default Values:**
+- `default-image`: `''` (empty)
+- `default-text-color`: `'000000'` (black)
+- `width`: `1000` pixels
+- `height`: `250` pixels
+- `flex-height`: `true`
+- `wp-head-callback`: `'zalbi_header_style'`
+
+**Source Code:**
+
+```php inc/custom-header.php
+function zalbi_custom_header_setup() {
+    add_theme_support(
+        'custom-header',
+        apply_filters(
+            'zalbi_custom_header_args',
+            array(
+                'default-image'      => '',
+                'default-text-color' => '000000',
+                'width'              => 1000,
+                'height'             => 250,
+                'flex-height'        => true,
+                'wp-head-callback'   => 'zalbi_header_style',
+            )
+        )
+    );
+}
+add_action( 'after_setup_theme', 'zalbi_custom_header_setup' );
+```
+
+**Extension Example:**
+
+```php
+// Customize header dimensions and defaults
+function my_custom_header_args( $args ) {
+    $args['width'] = 1920;
+    $args['height'] = 400;
+    $args['flex-width'] = true;
+    $args['default-text-color'] = '333333';
+    $args['default-image'] = get_stylesheet_directory_uri() . '/images/header-default.jpg';
+    return $args;
+}
+add_filter( 'zalbi_custom_header_args', 'my_custom_header_args' );
+```
+
+<Accordion title="Custom Header Arguments Explained">
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `default-image` | string | URL to default header image |
+| `default-text-color` | string | Hex color code (without #) for header text |
+| `width` | integer | Suggested width in pixels |
+| `height` | integer | Suggested height in pixels |
+| `flex-width` | boolean | Allow flexible width |
+| `flex-height` | boolean | Allow flexible height |
+| `wp-head-callback` | string | Callback function for custom CSS |
+
+</Accordion>
+
+---
+
+## Body Class Filters
+
+### body_class
+
+<ParamField path="Filter" type="string" default="body_class">
+  WordPress core filter for body classes
+</ParamField>
+
+<ParamField path="Callback" type="function" default="zalbi_body_classes">
+  Adds custom body classes
+</ParamField>
+
+<ParamField path="Parameters" type="array">
+  Array of CSS classes for the body element
+</ParamField>
+
+<ParamField path="Priority" type="integer" default="10">
+  Default priority
+</ParamField>
+
+<ParamField path="Location" type="string">
+  `inc/template-functions.php:27`
+</ParamField>
+
+**Purpose:** Adds custom CSS classes to the `<body>` element based on page context. This helps with styling and conditional CSS rules.
+
+**Classes Added:**
+- `hfeed`: Added to non-singular pages (archives, blog index, etc.)
+- `no-sidebar`: Added when the sidebar widget area is inactive
+
+**Source Code:**
+
+```php inc/template-functions.php
+function zalbi_body_classes( $classes ) {
+    // Adds a class of hfeed to non-singular pages.
+    if ( ! is_singular() ) {
+        $classes[] = 'hfeed';
+    }
+    
+    // Adds a class of no-sidebar when there is no sidebar present.
+    if ( ! is_active_sidebar( 'sidebar-1' ) ) {
+        $classes[] = 'no-sidebar';
+    }
+    
+    return $classes;
+}
+add_filter( 'body_class', 'zalbi_body_classes' );
+```
+
+**Extension Example:**
+
+```php
+// Add custom body classes for different post types
+function my_custom_body_classes( $classes ) {
+    // Add class for custom post types
+    if ( is_singular( 'hinchable' ) ) {
+        $classes[] = 'single-inflatable';
+    }
+    
+    if ( is_singular( 'evento' ) ) {
+        $classes[] = 'single-event';
+    }
+    
+    // Add class for logged-in users
+    if ( is_user_logged_in() ) {
+        $classes[] = 'user-logged-in';
+    }
+    
+    // Add class based on page template
+    if ( is_page_template( 'page-catalogo.php' ) ) {
+        $classes[] = 'catalog-page';
+    }
+    
+    return $classes;
+}
+add_filter( 'body_class', 'my_custom_body_classes' );
+```
+
+**Use Cases:**
+
+<Accordion title="Why Use Body Classes?">
+
+Body classes are extremely useful for:
+
+1. **Conditional Styling**: Apply different CSS rules based on page context
+   ```css
+   .no-sidebar .site-content {
+       width: 100%;
+   }
+   ```
+
+2. **JavaScript Targeting**: Identify page types in JavaScript
+   ```javascript
+   if (document.body.classList.contains('single-inflatable')) {
+       // Initialize inflatable gallery
+   }
+   ```
+
+3. **Template Variations**: Style the same template differently based on context
+   ```css
+   body.hfeed .entry-content {
+       /* Styling for archive pages */
+   }
+   ```
+
+4. **Accessibility**: Provide visual feedback for different states
+   ```css
+   body.user-logged-in .admin-notice {
+       display: block;
+   }
+   ```
+
+</Accordion>
+
+---
+
+## Filter Reference Table
+
+<Accordion title="Complete Filters List">
+
+| Filter | Type | Parameters | File | Purpose |
+|--------|------|------------|------|----------|
+| `zalbi_custom_background_args` | apply_filters | array | functions.php:66 | Modify custom background settings |
+| `zalbi_content_width` | apply_filters | integer | functions.php:96 | Modify content width value |
+| `zalbi_custom_header_args` | apply_filters | array | custom-header.php:23 | Modify custom header settings |
+| `body_class` | add_filter | array | template-functions.php:27 | Add custom body CSS classes |
+
+</Accordion>
+
+---
+
+## Filter Development Best Practices
+
+<Note>
+  When extending the theme using filters, follow these best practices:
+</Note>
+
+### 1. Use Appropriate Priority
+
+```php
+// Run after default filter
+add_filter( 'zalbi_content_width', 'my_content_width', 20 );
+
+// Run before default filter
+add_filter( 'zalbi_content_width', 'my_early_content_width', 5 );
+```
+
+### 2. Always Return Values
+
+```php
+// CORRECT: Always return the filtered value
+function my_filter( $value ) {
+    // Modify $value
+    return $value;
+}
+
+// WRONG: Forgetting to return
+function bad_filter( $value ) {
+    $value = $value * 2;
+    // Missing return statement!
+}
+```
+
+### 3. Check Data Types
+
+```php
+function safe_content_width( $width ) {
+    // Ensure we have an integer
+    $width = absint( $width );
+    
+    // Set reasonable bounds
+    if ( $width < 300 ) {
+        $width = 300;
+    }
+    if ( $width > 2000 ) {
+        $width = 2000;
+    }
+    
+    return $width;
+}
+add_filter( 'zalbi_content_width', 'safe_content_width' );
+```
+
+### 4. Use Conditional Logic
+
+```php
+function contextual_content_width( $width ) {
+    // Different widths for different contexts
+    if ( is_singular( 'hinchable' ) ) {
+        return 900; // Wider for inflatable pages
+    }
+    
+    if ( is_page_template( 'page-full-width.php' ) ) {
+        return 1200; // Full width pages
+    }
+    
+    return $width; // Default for everything else
+}
+add_filter( 'zalbi_content_width', 'contextual_content_width' );
+```
+
+### 5. Document Your Filters
+
+```php
+/**
+ * Modify content width for inflatable catalog pages
+ *
+ * Increases the content width to accommodate larger product images
+ * in the inflatable catalog.
+ *
+ * @param int $width The default content width in pixels.
+ * @return int Modified content width.
+ */
+function catalog_content_width( $width ) {
+    if ( is_post_type_archive( 'hinchable' ) || is_singular( 'hinchable' ) ) {
+        return 1000;
+    }
+    return $width;
+}
+add_filter( 'zalbi_content_width', 'catalog_content_width' );
+```
+
+---
+
+## Creating Custom Filters
+
+If you're developing a child theme or plugin that extends Zalbi, you can create your own filters:
+
+```php
+// In your child theme's functions.php
+
+// 1. Define where you'll apply the filter
+function my_custom_setting() {
+    $default_value = 'some value';
+    
+    // Apply a filter to allow modifications
+    $filtered_value = apply_filters( 'zalbi_child_custom_setting', $default_value );
+    
+    return $filtered_value;
+}
+
+// 2. Other developers can now hook into your filter
+function modify_custom_setting( $value ) {
+    return 'modified value';
+}
+add_filter( 'zalbi_child_custom_setting', 'modify_custom_setting' );
+```
+
+**Naming Convention:** Use the theme slug prefix (`zalbi_`) to avoid conflicts with other themes and plugins.
+
+---
+
+## Related Resources
+
+- [WordPress Plugin API Reference](https://developer.wordpress.org/plugins/hooks/)
+- [Filter Reference](https://codex.wordpress.org/Plugin_API/Filter_Reference)
+- [Actions Documentation](/api/actions)

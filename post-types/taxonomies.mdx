@@ -1,0 +1,355 @@
+---
+title: "Custom Taxonomies"
+description: "Categorization system for hinchables using the tipo_hinchable taxonomy"
+---
+
+The Zalbi Theme uses a custom taxonomy called **tipo_hinchable** (Inflatable Type) to categorize and filter hinchables in the rental catalog.
+
+## Taxonomy Registration
+
+The `tipo_hinchable` taxonomy is registered in `functions.php` using the `zalbi_register_taxonomies()` function:
+
+```php functions.php (lines 152-168)
+// Registrar la Taxonomía para el Filtro tipos de hinchable
+function zalbi_register_taxonomies() {
+    register_taxonomy( 'tipo_hinchable', 'hinchable', array(
+        'labels' => array( 
+            'name'          => 'Tipos de Hinchable',
+            'singular_name' => 'Tipo de Hinchable',
+            'menu_name'     => 'Tipos de Hinchable',
+        ),
+        'public'            => true,  // CRUCIAL: Para que se vea en la web
+        'hierarchical'      => true,  // Para que tenga casillas tipo check
+        'show_ui'           => true,  // Para que salga en el admin
+        'show_admin_column' => true,  // Para ver la columna en la lista
+        'show_in_rest'      => true,  // CRUCIAL: Para que funcione el editor de bloques
+        'rewrite'           => array( 'slug' => 'tipo' ),
+    ) );
+}
+add_action( 'init', 'zalbi_register_taxonomies' );
+```
+
+## Configuration Parameters
+
+<ParamField path="taxonomy" type="string" default="tipo_hinchable">
+  The unique identifier for this taxonomy
+</ParamField>
+
+<ParamField path="post_type" type="string" default="hinchable">
+  Associates this taxonomy with the hinchable post type
+</ParamField>
+
+<ParamField path="labels" type="array">
+  Display labels for the taxonomy:
+  - **name**: "Tipos de Hinchable" (plural)
+  - **singular_name**: "Tipo de Hinchable" (singular)
+  - **menu_name**: "Tipos de Hinchable" (admin menu label)
+</ParamField>
+
+<ParamField path="public" type="boolean" default="true">
+  **CRUCIAL**: Makes the taxonomy visible on the website. Without this, taxonomy archives won't be accessible.
+</ParamField>
+
+<ParamField path="hierarchical" type="boolean" default="true">
+  Enables category-style hierarchy with checkbox selection (like categories). When `false`, behaves like tags.
+</ParamField>
+
+<ParamField path="show_ui" type="boolean" default="true">
+  **CRUCIAL**: Displays the taxonomy in the WordPress admin interface
+</ParamField>
+
+<ParamField path="show_admin_column" type="boolean" default="true">
+  Shows a "Tipos de Hinchable" column in the Hinchables list view for quick reference
+</ParamField>
+
+<ParamField path="show_in_rest" type="boolean" default="true">
+  **CRUCIAL**: Enables the taxonomy in the Gutenberg block editor. Required for the taxonomy to work with the modern WordPress editor.
+</ParamField>
+
+<ParamField path="rewrite.slug" type="string" default="tipo">
+  URL slug for taxonomy archives. Archives will be at `/tipo/term-name/`
+</ParamField>
+
+## Creating Tipos de Hinchable
+
+<Steps>
+  <Step title="Navigate to Taxonomy">
+    In WordPress admin, go to **Hinchables** > **Tipos de Hinchable**
+  </Step>
+  
+  <Step title="Add New Type">
+    On the left side of the screen:
+    - **Name**: Display name (e.g., "Castillos Hinchables")
+    - **Slug**: URL-friendly version (e.g., "castillos")
+    - **Description**: Optional description of this type
+  </Step>
+  
+  <Step title="Organize Hierarchy (Optional)">
+    Since `hierarchical` is `true`, you can create parent-child relationships:
+    - Parent: "Hinchables Acuáticos"
+      - Child: "Toboganes de Agua"
+      - Child: "Piscinas Hinchables"
+  </Step>
+  
+  <Step title="Click Add New Type">
+    The new type will appear in the list and be available when editing hinchables
+  </Step>
+</Steps>
+
+## Common Tipo Examples
+
+Here are typical categories you might create:
+
+- **Castillos** - Traditional bounce castles
+- **Toboganes** - Inflatable slides
+- **Hinchables Acuáticos** - Water inflatables
+- **Pistas Americanas** - Obstacle courses
+- **Juegos Interactivos** - Interactive games
+- **Combos** - Combination units (castle + slide)
+- **Hinchables para Adultos** - Adult-sized inflatables
+- **Temáticos** - Themed inflatables (princesses, superheroes, etc.)
+
+## URL Structure
+
+Taxonomy archive pages use the `/tipo/` slug:
+
+```
+https://yoursite.com/tipo/castillos/
+https://yoursite.com/tipo/toboganes/
+https://yoursite.com/tipo/hinchables-acuaticos/
+```
+
+Hierarchical structure:
+```
+/tipo/hinchables-acuaticos/
+/tipo/hinchables-acuaticos/toboganes-agua/
+```
+
+## Assigning Types to Hinchables
+
+### In the Admin
+
+When editing a hinchable:
+
+1. Look for the **Tipos de Hinchable** meta box (usually on the right sidebar)
+2. Check the appropriate types (multiple selections allowed)
+3. Update or publish the post
+
+<Note>
+  The `show_admin_column` setting displays the assigned types in the Hinchables list view, making it easy to see which types are assigned at a glance.
+</Note>
+
+### Programmatically
+
+```php
+// Assign a single type
+wp_set_object_terms( $post_id, 'castillos', 'tipo_hinchable' );
+
+// Assign multiple types
+wp_set_object_terms( $post_id, array( 'castillos', 'tematicos' ), 'tipo_hinchable' );
+
+// Add without removing existing types
+wp_set_object_terms( $post_id, 'toboganes', 'tipo_hinchable', true );
+```
+
+## Querying by Taxonomy
+
+### Get Hinchables of a Specific Type
+
+```php
+$args = array(
+    'post_type' => 'hinchable',
+    'tax_query' => array(
+        array(
+            'taxonomy' => 'tipo_hinchable',
+            'field' => 'slug',
+            'terms' => 'castillos'
+        )
+    )
+);
+$castillos = new WP_Query( $args );
+```
+
+### Multiple Types (OR)
+
+```php
+$args = array(
+    'post_type' => 'hinchable',
+    'tax_query' => array(
+        array(
+            'taxonomy' => 'tipo_hinchable',
+            'field' => 'slug',
+            'terms' => array( 'castillos', 'toboganes' ),
+            'operator' => 'IN' // Default, matches any
+        )
+    )
+);
+```
+
+### Multiple Types (AND)
+
+```php
+$args = array(
+    'post_type' => 'hinchable',
+    'tax_query' => array(
+        array(
+            'taxonomy' => 'tipo_hinchable',
+            'field' => 'slug',
+            'terms' => array( 'tematicos', 'castillos' ),
+            'operator' => 'AND' // Must have both
+        )
+    )
+);
+```
+
+## Taxonomy Archive Template
+
+WordPress looks for templates in this order:
+
+1. `taxonomy-tipo_hinchable-{term-slug}.php` - Specific term template
+2. `taxonomy-tipo_hinchable.php` - General tipo_hinchable template
+3. `taxonomy.php` - Generic taxonomy template
+4. `archive.php` - Generic archive template
+5. `index.php` - Ultimate fallback
+
+### Example: taxonomy-tipo_hinchable.php
+
+```php
+<?php get_header(); ?>
+
+<div class="tipo-archive">
+    <h1><?php single_term_title(); ?></h1>
+    
+    <?php if ( term_description() ) : ?>
+        <div class="tipo-description">
+            <?php echo term_description(); ?>
+        </div>
+    <?php endif; ?>
+    
+    <div class="hinchables-grid">
+        <?php if ( have_posts() ) : ?>
+            <?php while ( have_posts() ) : the_post(); ?>
+                <div class="hinchable-card">
+                    <?php the_post_thumbnail( 'medium' ); ?>
+                    <h3><?php the_title(); ?></h3>
+                    <?php the_excerpt(); ?>
+                    <a href="<?php the_permalink(); ?>">Ver Detalles</a>
+                </div>
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+    
+    <?php the_posts_pagination(); ?>
+</div>
+
+<?php get_footer(); ?>
+```
+
+## Getting Taxonomy Information
+
+### Get All Terms
+
+```php
+$tipos = get_terms( array(
+    'taxonomy' => 'tipo_hinchable',
+    'hide_empty' => true // Only show types with hinchables
+) );
+
+foreach ( $tipos as $tipo ) {
+    echo '<a href="' . get_term_link( $tipo ) . '">';
+    echo $tipo->name;
+    echo '</a>';
+}
+```
+
+### Get Terms for a Hinchable
+
+```php
+$tipos = get_the_terms( get_the_ID(), 'tipo_hinchable' );
+
+if ( $tipos && ! is_wp_error( $tipos ) ) {
+    foreach ( $tipos as $tipo ) {
+        echo '<span class="tipo-badge">' . $tipo->name . '</span>';
+    }
+}
+```
+
+### Count Hinchables in a Type
+
+```php
+$term = get_term_by( 'slug', 'castillos', 'tipo_hinchable' );
+echo $term->count . ' hinchables en esta categoría';
+```
+
+## Filter Navigation Example
+
+Create a filter menu for your catalog:
+
+```php
+<div class="tipo-filter">
+    <a href="/catalogo/" class="filter-all">Todos</a>
+    
+    <?php
+    $tipos = get_terms( array(
+        'taxonomy' => 'tipo_hinchable',
+        'hide_empty' => true
+    ) );
+    
+    foreach ( $tipos as $tipo ) {
+        $active = is_tax( 'tipo_hinchable', $tipo->slug ) ? 'active' : '';
+        echo '<a href="' . get_term_link( $tipo ) . '" class="filter-item ' . $active . '">';
+        echo $tipo->name . ' (' . $tipo->count . ')';
+        echo '</a>';
+    }
+    ?>
+</div>
+```
+
+## Block Editor Integration
+
+<Note>
+  The `show_in_rest` parameter is **crucial** for Gutenberg support. Without it, the taxonomy won't appear in the block editor.
+</Note>
+
+In the block editor:
+
+1. The taxonomy appears in the right sidebar under **Document** settings
+2. Users can check multiple types
+3. Hierarchical display shows parent-child relationships
+4. Real-time search for large taxonomy lists
+
+## Admin Column Display
+
+The `show_admin_column` setting adds a column to the Hinchables list:
+
+```
+| Title              | Tipos de Hinchable        | Date       |
+|--------------------|---------------------------|------------|
+| Castillo Medieval  | Castillos, Temáticos      | 2026-03-01 |
+| Tobogán Acuático   | Toboganes, Acuáticos      | 2026-03-02 |
+| Pista Americana    | Pistas Americanas         | 2026-03-03 |
+```
+
+This provides quick visual reference when managing your catalog.
+
+## Best Practices
+
+<Steps>
+  <Step title="Plan Your Hierarchy">
+    Before creating terms, plan your categorization structure. Too many levels can confuse users; too few limits filtering options.
+  </Step>
+  
+  <Step title="Use Descriptive Slugs">
+    Slugs appear in URLs, so make them SEO-friendly:
+    - Good: `castillos`, `toboganes-acuaticos`
+    - Bad: `tipo1`, `categoria-a`
+  </Step>
+  
+  <Step title="Add Descriptions">
+    Term descriptions can be displayed on archive pages and help with SEO. Describe what types of hinchables belong in each category.
+  </Step>
+  
+  <Step title="Avoid Over-Categorization">
+    Don't create too many types. If a type only has 1-2 hinchables, consider combining it with a related category.
+  </Step>
+</Steps>

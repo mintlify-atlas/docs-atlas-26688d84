@@ -1,0 +1,766 @@
+---
+title: "Customizer Functions"
+description: "WordPress Customizer functions for theme settings and live preview"
+icon: "sliders"
+---
+
+## Overview
+
+The Customizer functions provide theme settings that users can modify through the WordPress Theme Customizer interface. These functions are located in `/inc/customizer.php` and handle live preview, selective refresh, and JavaScript integration.
+
+<Info>
+The Customizer allows users to preview changes in real-time before publishing, providing an intuitive interface for theme configuration.
+</Info>
+
+---
+
+## zalbi_customize_register()
+
+Configures the WordPress Theme Customizer with postMessage transport for instant preview updates.
+
+### Function Signature
+
+```php
+function zalbi_customize_register( $wp_customize )
+```
+
+### Parameters
+
+<ParamField path="$wp_customize" type="WP_Customize_Manager" required>
+  WordPress Theme Customizer manager object that controls all customizer settings
+</ParamField>
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Modifies the customizer object directly
+</ResponseField>
+
+### What It Does
+
+This function enhances the default WordPress Customizer by:
+
+1. **Enabling Live Preview** - Changes transport method to `postMessage` for instant updates
+2. **Selective Refresh** - Refreshes only changed elements instead of entire page
+3. **Better UX** - Users see changes immediately without page reload
+
+### Modified Settings
+
+<AccordionGroup>
+  <Accordion title="blogname (Site Title)">
+    <ResponseField name="transport" type="string" default="postMessage">
+      Enables live preview for site title changes
+    </ResponseField>
+    
+    **Selective Refresh:**
+    ```php
+    array(
+        'selector'        => '.site-title a',
+        'render_callback' => 'zalbi_customize_partial_blogname',
+    )
+    ```
+    
+    Changes update the site title link text without full page refresh.
+  </Accordion>
+
+  <Accordion title="blogdescription (Tagline)">
+    <ResponseField name="transport" type="string" default="postMessage">
+      Enables live preview for site description/tagline
+    </ResponseField>
+    
+    **Selective Refresh:**
+    ```php
+    array(
+        'selector'        => '.site-description',
+        'render_callback' => 'zalbi_customize_partial_blogdescription',
+    )
+    ```
+    
+    Updates only the tagline element when changed.
+  </Accordion>
+
+  <Accordion title="header_textcolor (Header Text Color)">
+    <ResponseField name="transport" type="string" default="postMessage">
+      Enables live color preview for header text
+    </ResponseField>
+    
+    Color changes apply instantly via JavaScript without refresh.
+  </Accordion>
+</AccordionGroup>
+
+### Implementation
+
+```php
+function zalbi_customize_register( $wp_customize ) {
+    $wp_customize->get_setting( 'blogname' )->transport         = 'postMessage';
+    $wp_customize->get_setting( 'blogdescription' )->transport  = 'postMessage';
+    $wp_customize->get_setting( 'header_textcolor' )->transport = 'postMessage';
+
+    if ( isset( $wp_customize->selective_refresh ) ) {
+        $wp_customize->selective_refresh->add_partial(
+            'blogname',
+            array(
+                'selector'        => '.site-title a',
+                'render_callback' => 'zalbi_customize_partial_blogname',
+            )
+        );
+        $wp_customize->selective_refresh->add_partial(
+            'blogdescription',
+            array(
+                'selector'        => '.site-description',
+                'render_callback' => 'zalbi_customize_partial_blogdescription',
+            )
+        );
+    }
+}
+add_action( 'customize_register', 'zalbi_customize_register' );
+```
+
+### Transport Methods Explained
+
+<CardGroup cols={2}>
+  <Card title="postMessage" icon="bolt">
+    **Fast**: Updates via JavaScript without page reload
+    
+    Best for: Text, colors, sizes that can change via JS
+  </Card>
+  
+  <Card title="refresh" icon="rotate">
+    **Reliable**: Reloads entire preview pane
+    
+    Best for: Complex changes requiring PHP processing
+  </Card>
+</CardGroup>
+
+### Selective Refresh Benefits
+
+<Steps>
+  <Step title="User types new site title">
+    Change detected in Customizer control
+  </Step>
+  <Step title="Partial refresh triggered">
+    Only `.site-title a` element is targeted
+  </Step>
+  <Step title="Callback executed">
+    `zalbi_customize_partial_blogname()` generates new content
+  </Step>
+  <Step title="Element updated">
+    Only the site title updates - page doesn't reload
+  </Step>
+</Steps>
+
+<Tip>
+**Performance**: Selective refresh is faster than full page refresh and provides better user experience.
+</Tip>
+
+---
+
+## zalbi_customize_partial_blogname()
+
+Render callback for the selective refresh partial of the site title.
+
+### Function Signature
+
+```php
+function zalbi_customize_partial_blogname()
+```
+
+### Parameters
+
+None
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Outputs the site name directly via `bloginfo()`
+</ResponseField>
+
+### Purpose
+
+This function is called by the Customizer when the site title changes in live preview mode. It outputs just the site name without any wrapper HTML.
+
+### Implementation
+
+```php
+function zalbi_customize_partial_blogname() {
+    bloginfo( 'name' );
+}
+```
+
+### Usage
+
+This function is **automatically called** by the Customizer API when:
+- User modifies site title in Customizer
+- Selective refresh is supported
+- Live preview is active
+
+### Template Requirement
+
+For selective refresh to work, your theme header must use the selector `.site-title a`:
+
+```php
+<!-- header.php -->
+<div class="site-branding">
+    <?php if ( is_front_page() && is_home() ) : ?>
+        <h1 class="site-title">
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
+                <?php bloginfo( 'name' ); ?>
+            </a>
+        </h1>
+    <?php else : ?>
+        <p class="site-title">
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
+                <?php bloginfo( 'name' ); ?>
+            </a>
+        </p>
+    <?php endif; ?>
+</div>
+```
+
+<Warning>
+If your template uses a different selector (e.g., `.logo-text`), update the selector in `zalbi_customize_register()` to match.
+</Warning>
+
+---
+
+## zalbi_customize_partial_blogdescription()
+
+Render callback for the selective refresh partial of the site tagline/description.
+
+### Function Signature
+
+```php
+function zalbi_customize_partial_blogdescription()
+```
+
+### Parameters
+
+None
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Outputs the site description directly via `bloginfo()`
+</ResponseField>
+
+### Purpose
+
+Called by the Customizer to refresh only the site tagline when it changes, without reloading the entire preview.
+
+### Implementation
+
+```php
+function zalbi_customize_partial_blogdescription() {
+    bloginfo( 'description' );
+}
+```
+
+### Template Requirement
+
+Your header template must include the `.site-description` element:
+
+```php
+<!-- header.php -->
+<div class="site-branding">
+    <p class="site-title">
+        <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
+            <?php bloginfo( 'name' ); ?>
+        </a>
+    </p>
+    
+    <?php
+    $description = get_bloginfo( 'description', 'display' );
+    if ( $description || is_customize_preview() ) :
+        ?>
+        <p class="site-description"><?php echo $description; ?></p>
+    <?php endif; ?>
+</div>
+```
+
+<Note>
+The `is_customize_preview()` check ensures the element exists even when tagline is empty, allowing Customizer to refresh it when text is added.
+</Note>
+
+---
+
+## zalbi_customize_preview_js()
+
+Enqueues the JavaScript file that handles live preview updates in the Customizer.
+
+### Function Signature
+
+```php
+function zalbi_customize_preview_js()
+```
+
+### Parameters
+
+None
+
+### Return Value
+
+<ResponseField name="void" type="void">
+  Enqueues customizer.js for preview frame
+</ResponseField>
+
+### Purpose
+
+Loads JavaScript that:
+- Listens for Customizer setting changes
+- Updates preview elements in real-time
+- Handles `postMessage` transport for instant updates
+
+### Implementation
+
+```php
+function zalbi_customize_preview_js() {
+    wp_enqueue_script( 
+        'zalbi-customizer', 
+        get_template_directory_uri() . '/js/customizer.js', 
+        array( 'customize-preview' ), 
+        _S_VERSION, 
+        true 
+    );
+}
+add_action( 'customize_preview_init', 'zalbi_customize_preview_js' );
+```
+
+### Script Details
+
+<ParamField path="handle" type="string" default="zalbi-customizer">
+  Unique script identifier
+</ParamField>
+
+<ParamField path="src" type="string">
+  Path to `/js/customizer.js` in theme directory
+</ParamField>
+
+<ParamField path="dependencies" type="array" default="['customize-preview']">
+  Depends on WordPress Customizer preview API
+</ParamField>
+
+<ParamField path="version" type="string" default="_S_VERSION">
+  Theme version for cache busting
+</ParamField>
+
+<ParamField path="in_footer" type="boolean" default="true">
+  Loads in footer for better performance
+</ParamField>
+
+### Customizer JavaScript Example
+
+The enqueued `/js/customizer.js` file typically contains:
+
+```javascript
+/**
+ * File customizer.js.
+ *
+ * Theme Customizer enhancements for a better user experience.
+ */
+
+( function( $ ) {
+    // Site title
+    wp.customize( 'blogname', function( value ) {
+        value.bind( function( newval ) {
+            $( '.site-title a' ).text( newval );
+        } );
+    } );
+
+    // Site description
+    wp.customize( 'blogdescription', function( value ) {
+        value.bind( function( newval ) {
+            $( '.site-description' ).text( newval );
+        } );
+    } );
+
+    // Header text color
+    wp.customize( 'header_textcolor', function( value ) {
+        value.bind( function( newval ) {
+            if ( 'blank' === newval ) {
+                $( '.site-title, .site-description' ).css( {
+                    'clip': 'rect(1px, 1px, 1px, 1px)',
+                    'position': 'absolute'
+                } );
+            } else {
+                $( '.site-title, .site-description' ).css( {
+                    'clip': 'auto',
+                    'position': 'relative'
+                } );
+                $( '.site-title a, .site-description' ).css( {
+                    'color': newval
+                } );
+            }
+        } );
+    } );
+} )( jQuery );
+```
+
+### How It Works
+
+<Steps>
+  <Step title="Customizer loads">
+    User opens Customizer, preview frame loads with this script
+  </Step>
+  <Step title="Script registers listeners">
+    `wp.customize()` binds to specific settings
+  </Step>
+  <Step title="User makes change">
+    Modifies site title, tagline, or header color
+  </Step>
+  <Step title="JavaScript updates preview">
+    Change instantly reflected without page reload
+  </Step>
+</Steps>
+
+<Info>
+**Only in Customizer**: This script only loads in the Customizer preview pane, not on the public site.
+</Info>
+
+---
+
+## Customizer Settings Summary
+
+### Built-in WordPress Settings Enhanced
+
+<CardGroup cols={3}>
+  <Card title="Site Title" icon="heading">
+    **Setting**: `blogname`
+    
+    **Transport**: postMessage
+    
+    **Selector**: `.site-title a`
+  </Card>
+  
+  <Card title="Tagline" icon="text">
+    **Setting**: `blogdescription`
+    
+    **Transport**: postMessage
+    
+    **Selector**: `.site-description`
+  </Card>
+  
+  <Card title="Header Color" icon="palette">
+    **Setting**: `header_textcolor`
+    
+    **Transport**: postMessage
+    
+    **Updated**: Via JavaScript
+  </Card>
+</CardGroup>
+
+### Custom Zalbi Settings
+
+<Card title="WhatsApp Button" icon="phone" href="/api/theme-setup#zalbi_customize_whatsapp">
+  **Setting**: `zalbi_whatsapp_number`
+  
+  **Location**: Defined in `functions.php`
+  
+  **Section**: "Botón WhatsApp"
+  
+  **Transport**: refresh (requires page reload)
+</Card>
+
+---
+
+## Extending the Customizer
+
+### Adding a New Setting with Live Preview
+
+```php
+// In functions.php or inc/customizer.php
+
+function zalbi_custom_settings( $wp_customize ) {
+    // Add section
+    $wp_customize->add_section( 'zalbi_colors', array(
+        'title'    => __( 'Theme Colors', 'zalbi' ),
+        'priority' => 30,
+    ));
+    
+    // Add setting
+    $wp_customize->add_setting( 'zalbi_accent_color', array(
+        'default'           => '#FF6B6B',
+        'transport'         => 'postMessage',
+        'sanitize_callback' => 'sanitize_hex_color',
+    ));
+    
+    // Add control
+    $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'zalbi_accent_color', array(
+        'label'    => __( 'Accent Color', 'zalbi' ),
+        'section'  => 'zalbi_colors',
+    )));
+    
+    // Add selective refresh
+    if ( isset( $wp_customize->selective_refresh ) ) {
+        $wp_customize->selective_refresh->add_partial( 'zalbi_accent_color', array(
+            'selector'            => '.button, .accent',
+            'container_inclusive' => false,
+            'render_callback'     => function() {
+                return get_theme_mod( 'zalbi_accent_color', '#FF6B6B' );
+            },
+        ));
+    }
+}
+add_action( 'customize_register', 'zalbi_custom_settings' );
+```
+
+### Corresponding JavaScript
+
+```javascript
+// In js/customizer.js
+
+// Accent color
+wp.customize( 'zalbi_accent_color', function( value ) {
+    value.bind( function( newval ) {
+        $( '.button, .accent' ).css( 'background-color', newval );
+    } );
+} );
+```
+
+### Using Settings in Templates
+
+```php
+// Get Customizer value in template
+$accent_color = get_theme_mod( 'zalbi_accent_color', '#FF6B6B' );
+
+// Output inline styles
+?>
+<style>
+    .button,
+    .accent {
+        background-color: <?php echo esc_attr( $accent_color ); ?>;
+    }
+</style>
+```
+
+---
+
+## Customizer API Reference
+
+### Core WordPress Functions Used
+
+<AccordionGroup>
+  <Accordion title="$wp_customize->get_setting()">
+    Retrieves an existing Customizer setting object to modify its properties.
+    
+    ```php
+    $setting = $wp_customize->get_setting( 'blogname' );
+    $setting->transport = 'postMessage';
+    ```
+  </Accordion>
+
+  <Accordion title="$wp_customize->add_section()">
+    Creates a new section in the Customizer sidebar.
+    
+    ```php
+    $wp_customize->add_section( 'section_id', array(
+        'title'       => 'Section Title',
+        'description' => 'Section description',
+        'priority'    => 30,
+    ));
+    ```
+  </Accordion>
+
+  <Accordion title="$wp_customize->add_setting()">
+    Registers a new Customizer setting.
+    
+    ```php
+    $wp_customize->add_setting( 'setting_id', array(
+        'default'           => 'default value',
+        'transport'         => 'postMessage', // or 'refresh'
+        'sanitize_callback' => 'sanitize_text_field',
+    ));
+    ```
+  </Accordion>
+
+  <Accordion title="$wp_customize->add_control()">
+    Adds a UI control for a setting.
+    
+    ```php
+    $wp_customize->add_control( 'control_id', array(
+        'label'    => 'Control Label',
+        'section'  => 'section_id',
+        'settings' => 'setting_id',
+        'type'     => 'text', // text, checkbox, radio, select, etc.
+    ));
+    ```
+  </Accordion>
+
+  <Accordion title="selective_refresh->add_partial()">
+    Registers a partial for selective refresh.
+    
+    ```php
+    $wp_customize->selective_refresh->add_partial( 'setting_id', array(
+        'selector'        => '.css-selector',
+        'render_callback' => 'callback_function_name',
+    ));
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Helper Functions
+
+<ResponseField name="get_theme_mod()" type="function">
+  Retrieves a theme modification value
+  
+  ```php
+  $value = get_theme_mod( 'setting_name', 'default_value' );
+  ```
+</ResponseField>
+
+<ResponseField name="set_theme_mod()" type="function">
+  Sets a theme modification value programmatically
+  
+  ```php
+  set_theme_mod( 'setting_name', 'new_value' );
+  ```
+</ResponseField>
+
+<ResponseField name="remove_theme_mod()" type="function">
+  Removes a theme modification
+  
+  ```php
+  remove_theme_mod( 'setting_name' );
+  ```
+</ResponseField>
+
+---
+
+## Hooks Reference
+
+<AccordionGroup>
+  <Accordion title="Actions">
+    <ResponseField name="customize_register" type="action">
+      **When**: Customizer is being initialized
+      
+      **Used by**: `zalbi_customize_register()`, `zalbi_customize_whatsapp()`
+      
+      **Priority**: 10 (default)
+    </ResponseField>
+    
+    <ResponseField name="customize_preview_init" type="action">
+      **When**: Customizer preview frame is loading
+      
+      **Used by**: `zalbi_customize_preview_js()`
+      
+      **Purpose**: Enqueue preview-specific scripts
+    </ResponseField>
+  </Accordion>
+
+  <Accordion title="Filters">
+    <ResponseField name="theme_mod_{$name}" type="filter">
+      Filters the value of a specific theme modification
+      
+      ```php
+      add_filter( 'theme_mod_zalbi_whatsapp_number', function( $value ) {
+          // Modify or validate the value
+          return $value;
+      });
+      ```
+    </ResponseField>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+### Live Preview Not Working
+
+<Steps>
+  <Step title="Check transport setting">
+    Ensure setting uses `'transport' => 'postMessage'`
+  </Step>
+  <Step title="Verify JavaScript is loaded">
+    Check that `customizer.js` exists and is enqueued
+  </Step>
+  <Step title="Confirm selector matches">
+    Partial selector must match actual HTML element
+  </Step>
+  <Step title="Test render callback">
+    Ensure callback function exists and outputs correct content
+  </Step>
+</Steps>
+
+### Selective Refresh Not Updating
+
+<Warning>
+**Common Issues**:
+- Selector doesn't match any elements in DOM
+- Render callback is missing or returns nothing
+- Element is inside a conditional that evaluates to false
+- JavaScript errors preventing listener registration
+</Warning>
+
+**Debug Steps**:
+
+```javascript
+// In js/customizer.js, add console logging
+wp.customize( 'setting_name', function( value ) {
+    value.bind( function( newval ) {
+        console.log( 'Setting changed to:', newval );
+        $( '.selector' ).text( newval );
+    } );
+} );
+```
+
+### Settings Not Saving
+
+Check sanitization callback:
+
+```php
+// Proper sanitization is required
+$wp_customize->add_setting( 'my_setting', array(
+    'sanitize_callback' => 'sanitize_text_field', // Must be valid
+));
+
+// Common sanitization callbacks:
+// - sanitize_text_field
+// - sanitize_email
+// - sanitize_hex_color
+// - esc_url_raw
+// - absint
+// - wp_kses_post
+```
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use postMessage" icon="bolt">
+    Enable instant preview for better UX whenever possible
+  </Card>
+  
+  <Card title="Selective Refresh" icon="arrows-rotate">
+    Update only changed elements instead of full page
+  </Card>
+  
+  <Card title="Sanitize Everything" icon="shield">
+    Always use proper sanitization callbacks for security
+  </Card>
+  
+  <Card title="Provide Defaults" icon="circle-check">
+    Every setting should have a sensible default value
+  </Card>
+</CardGroup>
+
+### Performance Tips
+
+1. **Use Selective Refresh** over full page refresh when possible
+2. **Minimize JavaScript** - Only update elements that changed
+3. **Cache theme mods** - Don't call `get_theme_mod()` repeatedly
+4. **Enqueue only in Customizer** - Use `customize_preview_init` hook
+
+---
+
+## Related Functions
+
+<CardGroup cols={2}>
+  <Card title="Theme Setup" icon="gear" href="/api/theme-setup">
+    Core theme initialization and WordPress feature support
+  </Card>
+  
+  <Card title="Template Tags" icon="tags" href="/api/template-tags">
+    Display functions for post metadata and content
+  </Card>
+</CardGroup>

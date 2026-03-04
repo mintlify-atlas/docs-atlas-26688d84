@@ -1,0 +1,489 @@
+---
+title: 'Custom Page Templates'
+description: 'Learn how to use and customize the specialized page templates in Zalbi Theme'
+---
+
+## Overview
+
+Zalbi Theme includes four custom page templates designed specifically for displaying inflatables and events with bilingual support (Spanish/Euskera):
+
+- **page-catalogo.php** - Catalog page with filtering
+- **page-eventos.php** - Events listing page
+- **single-hinchable.php** - Individual inflatable details
+- **single-evento.php** - Individual event details
+
+All templates support Polylang language detection and include custom translation logic.
+
+---
+
+## Catalog Template
+
+### page-catalogo.php
+
+Displays all inflatables with category filtering and custom ordering.
+
+**Location:** `page-catalogo.php`
+
+**Template Name:** `Plantilla Catalogo`
+
+### Features
+
+- Dynamic category filters based on `tipo_hinchable` taxonomy
+- Custom category ordering (Hinchables → Acuáticos → Deportivos → Juegos)
+- Product sorting by category priority
+- JavaScript-powered filtering with smooth animations
+- Bilingual support (Spanish/Euskera)
+- URL parameter support for deep linking (`?cat=category-slug`)
+
+### Usage
+
+1. Create a new page in WordPress
+2. Select **Plantilla Catalogo** from the Template dropdown
+3. Publish the page
+
+### Custom Category Order
+
+Categories are displayed in a specific order defined in the template:
+
+```php
+$orden_personalizado = array(
+    // Hinchables / Puzgarriak
+    'hinchable', 'hinchables', 'puzgarria', 'puzgarriak', 'puxgarriak',
+    
+    // Acuáticos / Uretakoak
+    'acuatico', 'acuaticos', 'uretakoa', 'uretakoak',
+    
+    // Deportivos / Kirol atrakzioak
+    'atracciones-deportivas', 'deportivos', 'kirola', 'kirol-atrakzioak',
+
+    // Juegos / Jokoak
+    'juegos', 'juego', 'jokoak', 'jokoa'
+);
+```
+
+<Note>
+To add a new category to the custom order, add its slug to the `$orden_personalizado` array. Categories not in the array will appear at the end.
+</Note>
+
+### Query Parameters
+
+The catalog supports filtering via URL:
+
+```
+https://yoursite.com/catalogo?cat=acuatico
+```
+
+This will automatically filter to show only water-based inflatables.
+
+### Required ACF Fields
+
+Each inflatable post requires:
+
+- `etiqueta_color` - Color tag class (tag-pink, tag-blue, tag-orange, tag-green, tag-purple)
+- `medidas` - Dimensions text
+- `capacidad` - Capacity text
+
+### Bilingual Labels
+
+The template automatically detects the current language:
+
+```php
+$es_euskera = (function_exists('pll_current_language') && pll_current_language() == 'eu');
+
+if ($es_euskera) {
+    $nombres_visuales = array(
+        'tag-orange' => 'Kirola',
+        'tag-pink'   => 'Puzgarria',
+        'tag-blue'   => 'Uretakoa',
+        'tag-green'  => 'Ekitaldia',
+        'tag-purple' => 'Jokoa'
+    );
+    $texto_boton = 'Ikusi Ezaugarriak';
+} else {
+    $nombres_visuales = array(
+        'tag-orange' => 'Deportivo',
+        'tag-pink'   => 'Hinchable',
+        'tag-blue'   => 'Acuatico',
+        'tag-green'  => 'Evento',
+        'tag-purple' => 'Juego'
+    );
+    $texto_boton = 'Ver Características';
+}
+```
+
+### Filter JavaScript
+
+The template includes inline JavaScript for filtering:
+
+<Tabs>
+  <Tab title="Filter Logic">
+    ```javascript
+    function filterProducts(category) {
+        products.forEach(product => {
+            if (category === 'todos' || product.getAttribute('data-category') === category) {
+                product.style.display = 'block';
+                // Smooth fade-in animation
+                product.style.opacity = '0';
+                product.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    product.style.transition = 'all 0.3s ease';
+                    product.style.opacity = '1';
+                    product.style.transform = 'translateY(0)';
+                }, 50);
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    }
+    ```
+  </Tab>
+  <Tab title="URL Detection">
+    ```javascript
+    // Automatically filter based on URL parameter
+    const params = new URLSearchParams(window.location.search);
+    const urlCategory = params.get('cat');
+    if (urlCategory) {
+        setTimeout(() => filterProducts(urlCategory), 50);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Events Template
+
+### page-eventos.php
+
+Displays all events with bilingual support.
+
+**Location:** `page-eventos.php`
+
+**Template Name:** `Plantilla Eventos`
+
+### Features
+
+- Automatic language filtering via Polylang
+- Custom styling with green color scheme
+- Dual CTAs (view details + check availability)
+- Language-specific contact URLs
+
+### Usage
+
+1. Create a new page in WordPress
+2. Select **Plantilla Eventos** from the Template dropdown
+3. Publish the page
+
+### Bilingual Configuration
+
+```php
+if ($es_euskera) {
+    $t_titulo       = 'Ekitaldiak eta Animazioa';
+    $t_subtitulo    = 'Diskomobilak eta tailerrak';
+    $t_todos        = 'Guztiak';
+    $t_ver_mas      = 'Ikusi Ezaugarriak';
+    $t_dispo        = 'Galdetu Eskuragarritasuna';
+    $t_no_hay       = 'Ez dago ekitaldirik eskuragarri.';
+    $url_contacto   = home_url('/eu/kontaktua');
+} else {
+    $t_titulo       = 'Eventos y Animación';
+    $t_subtitulo    = 'Desde discomóviles y talleres';
+    $t_todos        = 'Todos';
+    $t_ver_mas      = 'Ver Características';
+    $t_dispo        = 'Consultar Disponibilidad';
+    $t_no_hay       = 'No hay eventos disponibles.';
+    $url_contacto   = home_url('/contacto');
+}
+```
+
+### Required ACF Fields
+
+- `etiqueta_texto` - Tag label text
+- `etiqueta_color` - Color tag class
+- `duracion` - Event duration
+- `publico` - Target audience
+
+<Info>
+The events query automatically filters by current language when Polylang is active.
+</Info>
+
+---
+
+## Single Inflatable Template
+
+### single-hinchable.php
+
+Displays detailed information for a single inflatable.
+
+**Location:** `single-hinchable.php`
+
+**Automatically used for:** All posts of type `hinchable`
+
+### Features
+
+- Breadcrumb navigation
+- Large featured image
+- Technical specifications box
+- Color-coded category tags
+- Related products section (3 random items)
+- CTA to contact page
+- Full bilingual support
+
+### Structure
+
+<Tabs>
+  <Tab title="Breadcrumbs">
+    ```php
+    <p class="breadcrumbs">
+        <a href="<?php echo home_url(); ?>"><?php echo $txt_inicio; ?></a> > 
+        <a href="<?php echo $url_catalogo; ?>"><?php echo $txt_catalogo; ?></a> > 
+        <span><?php the_title(); ?></span>
+    </p>
+    ```
+  </Tab>
+  <Tab title="Specifications">
+    ```php
+    <div class="spec-box">
+        <h3><?php echo $txt_ficha; ?></h3>
+        
+        <div class="spec-row">
+            <span><i class="fas fa-ruler-combined"></i> <?php echo $txt_medidas; ?></span>
+            <strong><?php echo $medidas; ?></strong>
+        </div>
+        
+        <div class="spec-row">
+            <span><i class="fas fa-users"></i> <?php echo $txt_capacidad; ?></span>
+            <strong><?php echo $capacidad; ?></strong>
+        </div>
+    </div>
+    ```
+  </Tab>
+  <Tab title="Related Products">
+    ```php
+    $related_args = array(
+        'post_type' => 'hinchable',
+        'posts_per_page' => 3,
+        'post__not_in' => array(get_the_ID()),
+        'orderby' => 'rand'
+    );
+    $related = new WP_Query($related_args);
+    ```
+  </Tab>
+</Tabs>
+
+### Color Tag Translation
+
+The template translates color tags to category names:
+
+```php
+$nombres_visuales = array(
+    'tag-orange' => 'Atracción deportiva', // Kirola in Euskera
+    'tag-pink'   => 'Hinchable',          // Puzgarria
+    'tag-blue'   => 'Acuático',           // Uretakoa
+    'tag-green'  => 'Evento',             // Ekitaldia
+    'tag-purple' => 'Juego'               // Jokoa
+);
+```
+
+---
+
+## Single Event Template
+
+### single-evento.php
+
+Displays detailed information for a single event.
+
+**Location:** `single-evento.php`
+
+**Automatically used for:** All posts of type `evento`
+
+### Features
+
+- Breadcrumb navigation
+- Event details box (duration + audience)
+- Custom green-themed styling
+- Direct quote request CTA
+- Full bilingual support
+
+### Event Details Box
+
+```php
+<div class="spec-box">
+    <h3><?php echo $txt_detalles; ?></h3>
+    
+    <?php if($duracion): ?>
+    <div class="spec-row">
+        <span><i class="fas fa-clock"></i> <?php echo $txt_duracion; ?></span>
+        <strong><?php echo $duracion; ?></strong>
+    </div>
+    <?php endif; ?>
+
+    <?php if($publico): ?>
+    <div class="spec-row" style="border:none;">
+        <span><i class="fas fa-users"></i> <?php echo $txt_publico; ?></span>
+        <strong><?php echo $publico; ?></strong>
+    </div>
+    <?php endif; ?>
+</div>
+```
+
+### CTA Styling
+
+Events use a green-themed call-to-action:
+
+```php
+<div class="cta-box" style="background: var(--c-green);">
+    <p style="margin-bottom: 10px; font-weight: bold;"><?php echo $txt_cta_preg; ?></p>
+    <a href="<?php echo $url_contacto; ?>" class="btn" style="background: white; color: var(--c-green); width: 100%;">
+        <?php echo $txt_cta_btn; ?>
+    </a>
+</div>
+```
+
+---
+
+## Bilingual Implementation
+
+### Language Detection
+
+All templates use the same detection pattern:
+
+```php
+$es_euskera = (function_exists('pll_current_language') && pll_current_language() == 'eu');
+```
+
+### Translation Arrays
+
+Define all text strings in conditional arrays:
+
+```php
+if ($es_euskera) {
+    // Euskera translations
+    $txt_inicio = 'Hasiera';
+    $txt_catalogo = 'Katalogoa';
+    $url_catalogo = home_url('/eu/katalogoa');
+    $url_contacto = home_url('/eu/kontaktua');
+} else {
+    // Spanish translations
+    $txt_inicio = 'Inicio';
+    $txt_catalogo = 'Catálogo';
+    $url_catalogo = home_url('/catalogo');
+    $url_contacto = home_url('/contacto');
+}
+```
+
+<Note>
+URLs must be adjusted for each language to match your page slugs in Polylang.
+</Note>
+
+---
+
+## CSS Classes Reference
+
+### Product Cards
+
+```css
+.product-card          /* Main card container */
+.card-content         /* Content area below image */
+.card-tag             /* Category label */
+.card-title           /* Product/event title */
+.card-specs           /* Specifications list */
+```
+
+### Color Tags
+
+```css
+.tag-pink      /* Hinchables / Puzgarriak */
+.tag-blue      /* Acuáticos / Uretakoak */
+.tag-orange    /* Deportivos / Kirola */
+.tag-green     /* Eventos / Ekitaldiak */
+.tag-purple    /* Juegos / Jokoak */
+```
+
+### Layout Components
+
+```css
+.hero-catalog              /* Page header section */
+.filter-wrapper            /* Filter buttons container */
+.filter-box                /* Filter buttons group */
+.product-detail-layout     /* Two-column layout for singles */
+.spec-box                  /* Technical specifications */
+.spec-row                  /* Individual specification */
+.cta-box                   /* Call-to-action section */
+.breadcrumbs               /* Breadcrumb navigation */
+```
+
+---
+
+## Best Practices
+
+<Tabs>
+  <Tab title="Adding Categories">
+    1. Create the taxonomy term in WordPress
+    2. Add the slug to `$orden_personalizado` array in desired position
+    3. Add translations to `$nombres_visuales` arrays in all templates
+    4. Assign a color tag class (or create a new one in CSS)
+  </Tab>
+  <Tab title="Customizing Filters">
+    - Filter logic is in inline JavaScript at bottom of page-catalogo.php
+    - Products use `data-category` attribute matching taxonomy slug
+    - Button active state uses `.btn-pink` class
+    - Animation duration: 300ms
+  </Tab>
+  <Tab title="Translation Updates">
+    When adding new text:
+    1. Add Spanish version to `else` block
+    2. Add Euskera version to `if ($es_euskera)` block
+    3. Update contact URLs if needed
+    4. Test both language versions
+  </Tab>
+</Tabs>
+
+---
+
+## Common Customizations
+
+### Change Number of Related Items
+
+In `single-hinchable.php:124`:
+
+```php
+$related_args = array(
+    'post_type' => 'hinchable',
+    'posts_per_page' => 3, // Change this number
+    'post__not_in' => array(get_the_ID()),
+    'orderby' => 'rand'
+);
+```
+
+### Modify Filter Animation
+
+In `page-catalogo.php:198-201`:
+
+```javascript
+product.style.transition = 'all 0.3s ease'; // Adjust duration
+product.style.opacity = '1';
+product.style.transform = 'translateY(0)'; // Adjust distance
+```
+
+### Add New Color Tag
+
+1. Define CSS color in stylesheet
+2. Add to all translation arrays
+3. Update ACF field options
+
+```php
+// In all four templates
+$nombres_visuales = array(
+    'tag-orange' => 'Deportivo',
+    'tag-pink'   => 'Hinchable',
+    'tag-blue'   => 'Acuatico',
+    'tag-green'  => 'Evento',
+    'tag-purple' => 'Juego',
+    'tag-red'    => 'New Category' // Add here
+);
+```
+
+<Info>
+Remember to update translations in both Spanish and Euskera sections!
+</Info>

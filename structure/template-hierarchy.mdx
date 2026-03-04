@@ -1,0 +1,382 @@
+---
+title: Template Hierarchy
+description: How WordPress template selection works in Zalbi Theme
+---
+
+Zalbi Theme implements the WordPress template hierarchy with custom templates for inflatables and events. This guide explains how WordPress selects which template file to use for different types of content.
+
+## Understanding WordPress Template Hierarchy
+
+WordPress follows a specific order when selecting template files. The theme provides templates at different levels of specificity, allowing WordPress to fall back to more generic templates when specific ones don't exist.
+
+<Note>
+WordPress always checks for the most specific template first, then falls back to more generic options.
+</Note>
+
+## Available Template Files
+
+Zalbi Theme includes the following template files:
+
+### Front Page
+```
+front-page.php          # Static front page or blog homepage
+```
+
+### Single Post/Page Templates
+```
+single-hinchable.php    # Single inflatable (custom post type)
+single-evento.php       # Single event (custom post type)
+single.php              # Single blog post
+page-catalogo.php       # Catalog page template
+page-eventos.php        # Events page template  
+page.php                # Generic page template
+```
+
+### Archive Templates
+```
+archive.php             # Generic archive (categories, tags, dates)
+```
+
+### Search & Error Templates
+```
+search.php              # Search results
+404.php                 # Not found error page
+```
+
+### Core Templates
+```
+index.php               # Fallback template for everything
+```
+
+### Partial Templates
+```
+header.php              # Site header
+footer.php              # Site footer
+sidebar.php             # Sidebar widget area
+comments.php            # Comments section
+```
+
+## Template Hierarchy Flow
+
+### 1. Front Page Display
+
+When visitors access the homepage:
+
+```
+1. front-page.php       ✓ EXISTS - Custom homepage implementation
+2. home.php             ✗ Not present
+3. index.php            ✓ Fallback
+```
+
+**Implementation**: `front-page.php` provides a custom homepage layout for Zalbi.
+
+### 2. Single Inflatable (Hinchable)
+
+When viewing a single inflatable at `/catalogo/inflatable-name/`:
+
+```
+1. single-hinchable.php     ✓ EXISTS - Custom template with ACF fields
+2. single.php               ✓ Fallback
+3. singular.php             ✗ Not present
+4. index.php                ✓ Ultimate fallback
+```
+
+<Accordion title="single-hinchable.php Implementation Details">
+**Features**:
+- Bilingual content (Spanish/Euskera)
+- ACF field integration:
+  - `medidas` (measurements)
+  - `capacidad` (capacity)  
+  - `etiqueta_color` (color tag)
+- Custom breadcrumb navigation
+- Category-based color coding
+- Translated category names
+
+**Template Location**: `single-hinchable.php:1`
+
+**Language Detection**:
+```php
+$es_euskera = (function_exists('pll_current_language') && pll_current_language() == 'eu');
+```
+</Accordion>
+
+### 3. Single Event (Evento)
+
+When viewing a single event at `/eventos/event-name/`:
+
+```
+1. single-evento.php        ✓ EXISTS - Event-specific template
+2. single.php               ✓ Fallback
+3. singular.php             ✗ Not present
+4. index.php                ✓ Ultimate fallback
+```
+
+**Implementation**: `single-evento.php` provides event-specific layout and functionality.
+
+### 4. Catalog Page
+
+When viewing the catalog page:
+
+```
+1. page-catalogo.php        ✓ EXISTS - Custom page template
+2. page.php                 ✓ Fallback
+3. singular.php             ✗ Not present
+4. index.php                ✓ Ultimate fallback
+```
+
+<Accordion title="page-catalogo.php Implementation Details">
+**Template Name**: "Plantilla Catalogo"
+
+**Features**:
+- Category filtering system
+- Custom taxonomy query (`tipo_hinchable`)
+- Bilingual category display
+- Custom ordering of inflatable types:
+  1. Hinchables/Puzgarriak (Inflatables)
+  2. Acuáticos/Uretakoak (Aquatics)
+  3. Deportivos/Kirol atrakzioak (Sports)
+  4. Juegos/Jokoak (Games)
+
+**Template Location**: `page-catalogo.php:1`
+
+**Category Order Configuration**:
+```php
+$orden_personalizado = array(
+    'hinchable', 'hinchables', 'puzgarria', 'puzgarriak',
+    'acuatico', 'acuaticos', 'uretakoa', 'uretakoak',
+    'atracciones-deportivas', 'deportivos', 'kirola',
+    'juegos', 'juego', 'jokoak', 'jokoa'
+);
+```
+</Accordion>
+
+### 5. Events Page
+
+When viewing the events archive:
+
+```
+1. page-eventos.php         ✓ EXISTS - Events listing template
+2. page.php                 ✓ Fallback
+3. singular.php             ✗ Not present
+4. index.php                ✓ Ultimate fallback
+```
+
+**Implementation**: `page-eventos.php` displays event listings.
+
+### 6. Blog Posts
+
+When viewing a single blog post:
+
+```
+1. single.php               ✓ EXISTS - Standard post template
+2. singular.php             ✗ Not present
+3. index.php                ✓ Fallback
+```
+
+**Implementation**: `single.php` provides the default single post layout.
+
+### 7. Pages
+
+When viewing a standard page:
+
+```
+1. page-{slug}.php          ✗ Not used (except catalogo/eventos)
+2. page-{id}.php            ✗ Not used
+3. page.php                 ✓ EXISTS - Generic page template
+4. singular.php             ✗ Not present
+5. index.php                ✓ Fallback
+```
+
+**Implementation**: `page.php` handles all standard pages.
+
+### 8. Archives
+
+When viewing category, tag, or date archives:
+
+```
+1. category-{slug}.php      ✗ Not present
+2. category-{id}.php        ✗ Not present
+3. category.php             ✗ Not present
+4. archive.php              ✓ EXISTS - Generic archive template
+5. index.php                ✓ Fallback
+```
+
+**Implementation**: `archive.php` handles all archive pages.
+
+### 9. Search Results
+
+When displaying search results:
+
+```
+1. search.php               ✓ EXISTS - Search results template
+2. index.php                ✓ Fallback
+```
+
+**Implementation**: `search.php` formats search results.
+
+### 10. 404 Error
+
+When a page is not found:
+
+```
+1. 404.php                  ✓ EXISTS - Custom 404 page
+2. index.php                ✓ Fallback
+```
+
+**Implementation**: `404.php` provides user-friendly error messaging.
+
+## Template Parts
+
+Reusable template components in `template-parts/` directory:
+
+### Content Templates
+
+<CardGroup cols={2}>
+  <Card title="content.php" icon="file-lines">
+    Default post content loop template
+    
+    **Used in**: archive.php, search.php, index.php
+  </Card>
+  
+  <Card title="content-page.php" icon="file">
+    Page content layout
+    
+    **Used in**: page.php
+  </Card>
+  
+  <Card title="content-search.php" icon="magnifying-glass">
+    Search result item formatting
+    
+    **Used in**: search.php
+  </Card>
+  
+  <Card title="content-none.php" icon="file-slash">
+    No results found message
+    
+    **Used in**: archive.php, search.php
+  </Card>
+</CardGroup>
+
+### Loading Template Parts
+
+Template parts are loaded using WordPress functions:
+
+```php
+// Load default content template
+get_template_part( 'template-parts/content', get_post_type() );
+
+// Load page content template
+get_template_part( 'template-parts/content', 'page' );
+
+// Load search results template
+get_template_part( 'template-parts/content', 'search' );
+
+// Load no content template
+get_template_part( 'template-parts/content', 'none' );
+```
+
+## Custom Template Assignment
+
+### Assigning Page Templates
+
+Page templates can be assigned in the WordPress admin:
+
+1. Edit a page in WordPress admin
+2. Look for "Page Attributes" or "Template" in the sidebar
+3. Select from:
+   - **Default Template** (uses `page.php`)
+   - **Plantilla Catalogo** (uses `page-catalogo.php`)
+
+<Note>
+`page-eventos.php` is automatically used when the page slug matches, not through template selection.
+</Note>
+
+## Template Loading Order Summary
+
+<Accordion title="Visual Hierarchy Chart">
+```
+WordPress Request
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it the front page?                       │
+│ → front-page.php → index.php                │
+└─────────────────────────────────────────────┘
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it a single inflatable?                  │
+│ → single-hinchable.php → single.php         │
+│   → index.php                               │
+└─────────────────────────────────────────────┘
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it a single event?                       │
+│ → single-evento.php → single.php            │
+│   → index.php                               │
+└─────────────────────────────────────────────┘
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it a page?                               │
+│ → page-{slug}.php → page.php → index.php   │
+└─────────────────────────────────────────────┘
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it a single post?                        │
+│ → single.php → index.php                    │
+└─────────────────────────────────────────────┘
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it an archive?                           │
+│ → archive.php → index.php                   │
+└─────────────────────────────────────────────┘
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it a search?                             │
+│ → search.php → index.php                    │
+└─────────────────────────────────────────────┘
+      |
+      v
+┌─────────────────────────────────────────────┐
+│ Is it a 404 error?                          │
+│ → 404.php → index.php                       │
+└─────────────────────────────────────────────┘
+```
+</Accordion>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Specificity" icon="bullseye">
+    Create specific templates only when needed. Zalbi Theme provides specific templates for custom post types while using generic templates for standard content.
+  </Card>
+  
+  <Card title="DRY Principle" icon="recycle">
+    Use template parts to avoid code duplication. The `template-parts/` directory contains reusable components.
+  </Card>
+  
+  <Card title="Fallback Safety" icon="shield">
+    Always maintain `index.php` as the ultimate fallback. This ensures the theme never fails to load.
+  </Card>
+  
+  <Card title="Consistent Structure" icon="sitemap">
+    Follow WordPress coding standards and maintain consistent file naming conventions.
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="Theme Overview" icon="home" href="./overview">
+    Return to the architecture overview
+  </Card>
+  
+  <Card title="File Organization" icon="folder-tree" href="./file-organization">
+    Detailed breakdown of every file
+  </Card>
+</CardGroup>

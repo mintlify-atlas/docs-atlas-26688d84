@@ -1,97 +1,212 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Zalbi Theme Documentation"
+description: "A custom WordPress theme for inflatable rentals and event management"
+mode: "custom"
 ---
 
-## Setting up
+<div className="relative overflow-hidden bg-gradient-to-br from-[#020627] via-[#11161e] to-[#020627] dark:bg-gradient-to-br dark:from-[#020627] dark:via-[#11161e] dark:to-[#020627] py-20">
+  <div className="max-w-6xl mx-auto px-6 sm:px-8">
+    <div className="text-center">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white dark:text-white mb-6">
+        Welcome to Zalbi Theme
+      </h1>
+      <p className="text-lg sm:text-xl text-gray-300 dark:text-gray-300 max-w-3xl mx-auto mb-10">
+        A powerful WordPress theme built for Zalbi Aisia eta Abenturs, featuring custom post types for inflatable rentals and event management.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="/installation"
+          className="inline-flex items-center px-6 py-3 bg-[#529c3a] hover:bg-[#3a7129] text-white dark:text-white font-semibold rounded-lg transition-colors"
+        >
+          Get Started
+        </a>
+        <a
+          href="/api/theme-setup"
+          className="inline-flex items-center px-6 py-3 border border-white/30 bg-white/10 hover:bg-white/20 text-white dark:text-white font-semibold rounded-lg transition-colors"
+        >
+          API Reference
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 
-Get your documentation site up and running in minutes.
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Quick Start
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Get up and running with Zalbi Theme in just a few steps.
+  </p>
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+  <Steps>
+    <Step title="Download and Install">
+      Clone the repository or download the theme files, then upload to your WordPress installation's `wp-content/themes/` directory.
 
-## Make it yours
+      ```bash
+      cd wp-content/themes/
+      git clone https://github.com/Garridoparrayeray/zalbi-theme.git
+      ```
+    </Step>
 
-Design a docs site that looks great and empowers your users.
+    <Step title="Install Dependencies">
+      Install the required Node.js and Composer dependencies to enable development tools.
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
+      ```bash
+      cd zalbi-theme
+      composer install
+      npm install
+      ```
+    </Step>
+
+    <Step title="Activate the Theme">
+      Navigate to **Appearance** > **Themes** in your WordPress admin dashboard and activate the Zalbi Theme.
+    </Step>
+
+    <Step title="Configure Custom Post Types">
+      The theme automatically registers two custom post types: Hinchables (inflatables) and Eventos (events). Start creating content immediately.
+    </Step>
+  </Steps>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Explore by Topic
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Dive into the different areas of Zalbi Theme to customize and extend your site.
+  </p>
+
+  <CardGroup cols={2}>
     <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+      title="Theme Structure"
+      icon="folder-tree"
+      href="/structure/overview"
+    >
+      Understand the file organization and template hierarchy of the theme.
+    </Card>
+    <Card
+      title="Custom Post Types"
+      icon="box"
+      href="/post-types/hinchables"
+    >
+      Learn how to manage Hinchables and Eventos with custom taxonomies.
+    </Card>
+    <Card
+      title="Customization"
+      icon="palette"
+      href="/customization/theme-customizer"
+    >
+      Configure theme settings, WhatsApp integration, and custom menus.
+    </Card>
+    <Card
+      title="Template Development"
+      icon="code"
+      href="/templates/custom-templates"
+    >
+      Create custom templates and use available hooks and filters.
+    </Card>
+  </CardGroup>
+</div>
 
-## Create beautiful pages
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Key Features
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Discover what makes Zalbi Theme powerful and flexible.
+  </p>
 
-Everything you need to create world-class documentation.
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="p-6 rounded-xl border border-gray-200 dark:border-[#27272a] bg-gray-50 dark:bg-[#1a1d27]">
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#529c3a]/10 dark:bg-[#529c3a]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#529c3a] dark:text-[#529c3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+            Custom Post Types
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Built-in support for Hinchables and Eventos with custom taxonomies for filtering.
+          </p>
+        </div>
+      </div>
+    </div>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+    <div className="p-6 rounded-xl border border-gray-200 dark:border-[#27272a] bg-gray-50 dark:bg-[#1a1d27]">
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#529c3a]/10 dark:bg-[#529c3a]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#529c3a] dark:text-[#529c3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+            WhatsApp Integration
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Floating WhatsApp button configurable via theme customizer for easy customer contact.
+          </p>
+        </div>
+      </div>
+    </div>
 
-## Need inspiration?
+    <div className="p-6 rounded-xl border border-gray-200 dark:border-[#27272a] bg-gray-50 dark:bg-[#1a1d27]">
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#529c3a]/10 dark:bg-[#529c3a]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#529c3a] dark:text-[#529c3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+            Built on Underscores
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Based on the popular _s starter theme with modern HTML5 templates and best practices.
+          </p>
+        </div>
+      </div>
+    </div>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+    <div className="p-6 rounded-xl border border-gray-200 dark:border-[#27272a] bg-gray-50 dark:bg-[#1a1d27]">
+      <div className="flex items-start gap-4">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#529c3a]/10 dark:bg-[#529c3a]/10 flex items-center justify-center">
+          <svg className="w-6 h-6 text-[#529c3a] dark:text-[#529c3a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+            RTL Support
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Full right-to-left language support with compiled RTL stylesheet included.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <div className="p-8 rounded-2xl border border-gray-200 dark:border-[#27272a] bg-gradient-to-br from-gray-50 to-white dark:from-[#1a1d27] dark:to-[#0f1117]">
+    <div className="text-center">
+      <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+        Ready to Build?
+      </h2>
+      <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
+        Start customizing Zalbi Theme for your inflatable rental business. Explore the complete API reference and template system.
+      </p>
+      <a
+        href="/quick-start"
+        className="inline-flex items-center px-6 py-3 bg-[#529c3a] hover:bg-[#3a7129] text-white dark:text-white font-semibold rounded-lg transition-colors"
+      >
+        View Quick Start Guide
+      </a>
+    </div>
+  </div>
+</div>
